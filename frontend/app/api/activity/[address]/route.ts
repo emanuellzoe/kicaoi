@@ -1,4 +1,4 @@
-// Per-user activity feed — fetches all 4 event types for one address.
+﻿// Per-user activity feed — fetches all 4 event types for one address.
 // force-dynamic: never statically pre-render at build time (blockchain fetch would timeout)
 export const dynamic = "force-dynamic";
 
