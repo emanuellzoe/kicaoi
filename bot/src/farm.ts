@@ -1,4 +1,4 @@
-// Full farm loop: harvest → unlock plot otomatis → plant.
+﻿// Full farm loop: harvest → unlock plot otomatis → plant.
 // unlockPlot hanya memakai SEED (gratis dari harvest), tidak butuh CELO tambahan.
 // Setiap wallet tumbuh dari 3 plot → 9 plot selama ~8 jam, hampir 3× lebih banyak TX.
 //
@@ -196,4 +196,4 @@ const txTotal = stat.harvested + stat.planted + stat.bought + stat.unlocked;
 log(`Farm selesai. TX total=${txTotal} (harvest=${stat.harvested} plant=${stat.planted} unlock=${stat.unlocked} buy=${stat.bought}) skipped=${stat.skipped} errors=${stat.errors}`);
 
 
-// [farm-v] 1
+// [farm-v] 2
