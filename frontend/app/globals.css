@@ -1,0 +1,179 @@
+:root {
+  --bg: #0e140c;
+  --surface: #161e12;
+  --card: #1d2718;
+  --green: #35d07f;
+  --yellow: #fcff52;
+  --soil: #8b5e3c;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --danger: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mobile-first container; on wide screens it stays centered & narrow */
+.shell {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+  min-height: 100dvh;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.brand h1 {
+  font-size: 20px;
+  margin: 0;
+}
+.brand .tag {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid #243018;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.balances {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.stat .label {
+  color: var(--muted);
+  font-size: 12px;
+}
+.stat .value {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 14px;
+  background: var(--green);
+  color: #06210f;
+  font-weight: 700;
+  transition: opacity 0.15s;
+}
+button.secondary {
+  background: #243018;
+  color: var(--text);
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+input {
+  font: inherit;
+  background: var(--surface);
+  border: 1px solid #2c3a1f;
+  color: var(--text);
+  border-radius: 12px;
+  padding: 11px 12px;
+  width: 100%;
+}
+
+.plots {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.plot {
+  background: var(--surface);
+  border: 1px solid #2c3a1f;
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.plot .emoji {
+  font-size: 34px;
+  line-height: 1.2;
+}
+.plot .state {
+  font-size: 12px;
+  color: var(--muted);
+}
+.plot.ready {
+  border-color: var(--green);
+}
+
+.crop-pick {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.crop-pick button {
+  flex: 1;
+  padding: 8px 4px;
+  font-size: 13px;
+  background: #243018;
+  color: var(--text);
+}
+.crop-pick button.active {
+  background: var(--green);
+  color: #06210f;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.warn {
+  background: #2a1d0e;
+  border: 1px solid #5a3d18;
+  color: #f5c97a;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.center {
+  text-align: center;
+}
+.mt {
+  margin-top: 10px;
+}
+.fullw {
+  width: 100%;
+}
