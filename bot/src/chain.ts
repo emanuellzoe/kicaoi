@@ -135,4 +135,4 @@ export async function pool<T>(
 
 // [chain-v] 2
 
-// [abi-v] 2
+// [abi-v] 3
