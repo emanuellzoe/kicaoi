@@ -194,3 +194,6 @@ await pool(wallets, config.concurrency, async (w) => {
 
 const txTotal = stat.harvested + stat.planted + stat.bought + stat.unlocked;
 log(`Farm selesai. TX total=${txTotal} (harvest=${stat.harvested} plant=${stat.planted} unlock=${stat.unlocked} buy=${stat.bought}) skipped=${stat.skipped} errors=${stat.errors}`);
+
+
+// [farm-v] 1
