@@ -1,4 +1,4 @@
-import "dotenv/config";
+﻿import "dotenv/config";
 import { fileURLToPath } from "url";
 import { parseEther, type Address } from "viem";
 import { resolveChain, type ChainName } from "./chains.js";
@@ -57,4 +57,4 @@ export const WALLETS_FILE = fileURLToPath(new URL("../wallets.json", import.meta
 export const PUBLIC_FILE  = fileURLToPath(new URL("../wallets.public.json", import.meta.url));
 
 
-// [bot-ver] 1.0.0
+// [bot-ver] 1.0.1
