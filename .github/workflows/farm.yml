@@ -32,6 +32,6 @@ jobs:
           KICAOI_ADDRESS:    ${{ vars.KICAOI_ADDRESS }}
           KICAOI_WALLETS:    ${{ secrets.KICAOI_WALLETS }}
           CROP_ID:           ${{ vars.CROP_ID || '1' }}
-          BUY_SEED_CELO:     ${{ vars.BUY_SEED_CELO || '0.15' }}
+          BUY_SEED_CELO:     ${{ vars.BUY_SEED_CELO || '0.05' }}
           CONCURRENCY:       ${{ vars.CONCURRENCY || '10' }}
-          MIN_GAS_RESERVE:   '0.02'
+          MIN_GAS_RESERVE:   '0.003'
