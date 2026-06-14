@@ -12,3 +12,6 @@ export function GrowthBar({ progress }: Props) {
     </div>
   );
 }
+
+
+// [growbar-v] 1
