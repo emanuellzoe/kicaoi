@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -522,4 +522,4 @@ function PlotCard({
 }
 
 
-// [farm-page-v] 1
+// [farm-page-v] 2
