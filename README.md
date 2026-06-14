@@ -18,18 +18,16 @@
 
 ---
 
-## 🟢 Live on Celo Sepolia (testnet)
+## 🟢 Live deployments
 
-| | |
-|---|---|
-| **Contract** | [`0x82622F1d43B25DBB2414285FF98c52d694661c61`](https://sepolia.celoscan.io/address/0x82622F1d43B25DBB2414285FF98c52d694661c61) |
-| **Network** | Celo Sepolia (chainId `11142220`) |
-| **Verification** | ✅ Sourcify (`exact_match`) |
-| **Conversion rate** | `1 CELO = 100 SEED` |
-| **Crops seeded** | Wheat · Pumpkin · Golden (in constructor) |
+| Network | Contract | Verification |
+|---|---|---|
+| **Celo Mainnet** (`42220`) | [`0xb8Fb82C02acCbb0cbE613e3633781a67438563d9`](https://celoscan.io/address/0xb8Fb82C02acCbb0cbE613e3633781a67438563d9) | ✅ Sourcify |
+| **Celo Sepolia** (`11142220`) | [`0x82622F1d43B25DBB2414285FF98c52d694661c61`](https://sepolia.celoscan.io/address/0x82622F1d43B25DBB2414285FF98c52d694661c61) | ✅ Sourcify (`exact_match`) |
 
-Point the frontend at it via `frontend/.env.local`:
-`NEXT_PUBLIC_KICAOI_CONTRACT_ADDRESS=0x82622F1d43B25DBB2414285FF98c52d694661c61`
+Rate `1 CELO = 100 SEED`; crops (Wheat · Pumpkin · Golden) seeded in the constructor.
+
+Both addresses are committed in `frontend/lib/deployments.ts`, so the frontend connects with no setup. Select the network with `NEXT_PUBLIC_CHAIN_ID` (`42220` mainnet / `11142220` sepolia); override the address with `NEXT_PUBLIC_KICAOI_CONTRACT_ADDRESS` if needed.
 
 ---
 
@@ -111,7 +109,7 @@ Targeting the **Proof of Ship — Celo Builder Program**: *ship real products as
 | Wanted category: **Games** | A casual idle farming game — not a DeFi/finance app. |
 | **MiniApp built with the MiniPay hook** | Detects `window.ethereum.isMiniPay`, auto-connects the injected wallet, and hides the Connect Wallet button inside MiniPay. 🚧 |
 | **Onchain activity** required | **Each plant/harvest/unlock is an onchain tx.** One funded farm produces dozens of transactions per day. |
-| **Deploy on Celo Mainnet, verified contract** | `KicaoiFarm.sol` targets Celo Mainnet with source verification on Celoscan. 🗺️ |
+| **Deploy on Celo Mainnet, verified contract** | ✅ Live on Celo Mainnet (`0xb8Fb…63d9`), Sourcify-verified. |
 | **Open source, public GitHub** | This repository is public and MIT-licensed. |
 | **"Simpler is better"** | One deposit asset (CELO), one internal currency (SEED), one loop, one small contract. |
 | **Mobile-first** | Warm, rounded, thumb-friendly farm UI for the MiniPay in-wallet browser. |
@@ -146,7 +144,7 @@ Builder activity is tracked on [Talent App](https://talent.app/) (Transactions, 
 | Contracts | OpenZeppelin `Ownable` / `ReentrancyGuard` integration | ✅ |
 | Contracts | Foundry unit tests (26 passing) | ✅ |
 | Deploy | Celo Sepolia (dev/QA) deployment + Sourcify verification | ✅ |
-| Deploy | **Celo Mainnet** deployment + Celoscan verification (eligibility) | 🗺️ |
+| Deploy | **Celo Mainnet** deployment + Sourcify verification (eligibility) | ✅ |
 | Roadmap | Cosmetics, daily bonus, batched plant/harvest | 🗺️ |
 
 ---
