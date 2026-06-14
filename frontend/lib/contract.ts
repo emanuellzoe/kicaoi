@@ -1,7 +1,15 @@
 // KicaoiFarm address + the minimal ABI the UI needs.
+import { deploymentForChain } from "./deployments";
 
-export const KICAOI_ADDRESS = (process.env.NEXT_PUBLIC_KICAOI_CONTRACT_ADDRESS ??
-  "0x0000000000000000000000000000000000000000") as `0x${string}`;
+const ZERO = "0x0000000000000000000000000000000000000000";
+
+// Resolution order: env override -> committed deployment registry -> zero.
+// This lets a teammate clone and run with no .env.local while still allowing
+// per-environment overrides.
+export const KICAOI_ADDRESS = ((process.env.NEXT_PUBLIC_KICAOI_CONTRACT_ADDRESS &&
+  process.env.NEXT_PUBLIC_KICAOI_CONTRACT_ADDRESS !== ZERO
+    ? process.env.NEXT_PUBLIC_KICAOI_CONTRACT_ADDRESS
+    : deploymentForChain()?.address) ?? ZERO) as `0x${string}`;
 
 // Crop catalog mirrors the contract constructor defaults (display only).
 export const CROPS = [
