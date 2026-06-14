@@ -87,10 +87,13 @@ export default function Page() {
 }
 
 function Farm({ address, enabled }: { address: `0x${string}`; enabled: boolean }) {
-  const base = { address: KICAOI_ADDRESS, abi: KICAOI_ABI } as const;
+  // Pin chainId on every read AND write. If the wallet is on the wrong network,
+  // writes throw a ChainMismatchError instead of sending on the wrong chain
+  // (e.g. spending real ETH on Ethereum), and reads always come from Celo.
+  const base = { address: KICAOI_ADDRESS, abi: KICAOI_ABI, chainId: activeChain.id } as const;
   const query = { enabled } as const;
 
-  const celo = useBalance({ address });
+  const celo = useBalance({ address, chainId: activeChain.id });
   const seed = useReadContract({ ...base, functionName: "seedBalance", args: [address], query });
   const stats = useReadContract({ ...base, functionName: "getStats", args: [address], query });
   const unlockCost = useReadContract({ ...base, functionName: "nextUnlockCost", args: [address], query });
