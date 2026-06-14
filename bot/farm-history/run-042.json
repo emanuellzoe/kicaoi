@@ -1,0 +1,27 @@
+﻿{
+  "runId": "run-042",
+  "timestamp": "2026-06-04T23:38:04Z",
+  "chain": "celo",
+  "contract": "0xb8Fb82C02acCbb0cbE613e3633781a67438563d9",
+  "wallets": 100,
+  "cropId": 1,
+  "cropName": "Wheat",
+  "transactions": {
+    "harvest": 276,
+    "plant": 238,
+    "buy": 4,
+    "unlockPlot": 0
+  },
+  "totalTx": 518,
+  "skipped": 3,
+  "errors": 0,
+  "duration": "39s",
+  "gas": {
+    "type": "legacy",
+    "priceGwei": 202.8,
+    "limitHarvest": 80000,
+    "limitPlant": 80000,
+    "limitBuy": 60000,
+    "limitUnlock": 100000
+  }
+}
