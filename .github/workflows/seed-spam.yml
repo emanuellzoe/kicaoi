@@ -1,0 +1,37 @@
+name: KICAOI Seed Spam
+
+on:
+  schedule:
+    # Setiap 10 menit — mode volume TX tanpa menunggu grow time
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  seed-spam:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: bot/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: bot
+
+      - name: Run seed spam
+        run: npm run seed-spam
+        working-directory: bot
+        env:
+          CHAIN:           ${{ vars.KICAOI_CHAIN || 'celo' }}
+          KICAOI_ADDRESS:  ${{ vars.KICAOI_ADDRESS }}
+          KICAOI_WALLETS:  ${{ secrets.KICAOI_WALLETS }}
+          SPAM_BUY_MIN:    '0.01'
+          SPAM_PER_RUN:    ${{ vars.SPAM_PER_RUN || '3' }}
+          CONCURRENCY:     ${{ vars.CONCURRENCY || '5' }}
+          MIN_GAS_RESERVE: '0.02'
