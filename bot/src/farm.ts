@@ -26,6 +26,11 @@ log(`Chain: ${config.chainName} | Contract: ${config.kicaoiAddress}`);
 
 const stat = { harvested: 0, planted: 0, bought: 0, unlocked: 0, skipped: 0, errors: 0 };
 
+// Use legacy gasPrice so viem doesn't apply a 2× safety buffer on the balance pre-check.
+// Celo mainnet supports legacy (type 0) transactions.
+const gasPrice = await publicClient.getGasPrice();
+const gp = { type: "legacy" as const, gasPrice };
+
 async function farmWallet(w: Wallet): Promise<void> {
   const { client, account } = makeWallet(w.privateKey);
 
@@ -46,6 +51,7 @@ async function farmWallet(w: Wallet): Promise<void> {
       const hash = await client.writeContract({
         ...contract, functionName: "buySeeds",
         value: config.buySeedCelo, account,
+        gas: 120000n, ...gp,
       });
       await publicClient.waitForTransactionReceipt({ hash });
       stat.bought++;
@@ -86,6 +92,7 @@ async function farmWallet(w: Wallet): Promise<void> {
       const hash = await client.writeContract({
         ...contract, functionName: "harvest",
         args: [BigInt(i)], account,
+        gas: 80000n, ...gp,
       });
       await publicClient.waitForTransactionReceipt({ hash });
       stat.harvested++;
@@ -109,6 +116,7 @@ async function farmWallet(w: Wallet): Promise<void> {
     try {
       const hash = await client.writeContract({
         ...contract, functionName: "unlockPlot", account,
+        gas: 100000n, ...gp,
       });
       await publicClient.waitForTransactionReceipt({ hash });
       plotCount++;
@@ -146,6 +154,7 @@ async function farmWallet(w: Wallet): Promise<void> {
         const hash = await client.writeContract({
           ...contract, functionName: "buySeeds",
           value: config.buySeedCelo, account,
+          gas: 60000n, ...gp,
         });
         await publicClient.waitForTransactionReceipt({ hash });
         stat.bought++;
@@ -173,6 +182,7 @@ async function farmWallet(w: Wallet): Promise<void> {
       const hash = await client.writeContract({
         ...contract, functionName: "plant",
         args: [BigInt(idx), cropId], account,
+        gas: 80000n, ...gp,
       });
       await publicClient.waitForTransactionReceipt({ hash });
       seeds -= BigInt(seedCost);
