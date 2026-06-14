@@ -18,6 +18,21 @@
 
 ---
 
+## 🟢 Live on Celo Sepolia (testnet)
+
+| | |
+|---|---|
+| **Contract** | [`0x82622F1d43B25DBB2414285FF98c52d694661c61`](https://sepolia.celoscan.io/address/0x82622F1d43B25DBB2414285FF98c52d694661c61) |
+| **Network** | Celo Sepolia (chainId `11142220`) |
+| **Verification** | ✅ Sourcify (`exact_match`) |
+| **Conversion rate** | `1 CELO = 100 SEED` |
+| **Crops seeded** | Wheat · Pumpkin · Golden (in constructor) |
+
+Point the frontend at it via `frontend/.env.local`:
+`NEXT_PUBLIC_KICAOI_CONTRACT_ADDRESS=0x82622F1d43B25DBB2414285FF98c52d694661c61`
+
+---
+
 ## Table of Contents
 
 1. [One-liner](#one-liner)
@@ -121,16 +136,16 @@ Builder activity is tracked on [Talent App](https://talent.app/) (Transactions, 
 
 | Area | Component | Status |
 |---|---|---|
-| Repo | Two-package layout (`frontend/`, `contracts/`) | 🚧 |
+| Repo | Two-package layout (`frontend/`, `contracts/`) | ✅ |
 | Repo | Product spec ([PRD.md](./PRD.md)) — economy, structs, functions, events | ✅ |
 | Frontend | Next.js + React + Tailwind scaffold | 🚧 |
 | Frontend | MiniPay integration — detect `isMiniPay`, auto-connect, hide Connect button | 🗺️ |
 | Frontend | Farm grid, buy-SEED, plant/harvest, shop, leaderboard | 🗺️ |
 | Contracts | Foundry project scaffold | 🚧 |
-| Contracts | `KicaoiFarm.sol` (buy SEED, plant, harvest, unlock, stats, admin) | 🗺️ |
-| Contracts | OpenZeppelin `Ownable` / `ReentrancyGuard` integration | 🗺️ |
-| Contracts | Foundry unit tests | 🗺️ |
-| Deploy | Celo Sepolia (dev/QA) deployment | 🗺️ |
+| Contracts | `KicaoiFarm.sol` (buy SEED, plant, harvest, unlock, stats, admin) | ✅ |
+| Contracts | OpenZeppelin `Ownable` / `ReentrancyGuard` integration | ✅ |
+| Contracts | Foundry unit tests (26 passing) | ✅ |
+| Deploy | Celo Sepolia (dev/QA) deployment + Sourcify verification | ✅ |
 | Deploy | **Celo Mainnet** deployment + Celoscan verification (eligibility) | 🗺️ |
 | Roadmap | Cosmetics, daily bonus, batched plant/harvest | 🗺️ |
 
