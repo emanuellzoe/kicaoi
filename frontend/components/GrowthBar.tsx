@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 type Props = { progress: number }; // 0..1
 
@@ -14,4 +14,4 @@ export function GrowthBar({ progress }: Props) {
 }
 
 
-// [growbar-v] 1
+// [growbar-v] 2
