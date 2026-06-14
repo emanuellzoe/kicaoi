@@ -1,5 +1,6 @@
-// Full farm loop: harvest plot yang sudah matang → beli seed jika kurang → plant plot kosong.
-// Setiap run menghasilkan harvest TX + plant TX per wallet.
+// Full farm loop: harvest → unlock plot otomatis → plant.
+// unlockPlot hanya memakai SEED (gratis dari harvest), tidak butuh CELO tambahan.
+// Setiap wallet tumbuh dari 3 plot → 9 plot selama ~8 jam, hampir 3× lebih banyak TX.
 //
 // Grow times (onchain): Wheat=5min | Pumpkin=30min | Golden=2hr
 //
@@ -14,7 +15,6 @@ import type { Wallet } from "./chain.js";
 
 const GROW_TIMES: Record<number, number> = { 1: 300, 2: 1800, 3: 7200 };
 const SEED_COSTS: Record<number, number> = { 1: 5,   2: 20,   3: 60   };
-const SEED_PER_CELO = 100;
 
 const wallets  = loadWallets();
 const cropId   = config.cropId;
@@ -24,7 +24,7 @@ const seedCost = SEED_COSTS[cropId] ?? 5;
 log(`Farm loop mulai: ${wallets.length} wallet | crop=${cropId} (grow=${growTime}s cost=${seedCost}SEED)`);
 log(`Chain: ${config.chainName} | Contract: ${config.kicaoiAddress}`);
 
-const stat = { harvested: 0, planted: 0, bought: 0, skipped: 0, errors: 0 };
+const stat = { harvested: 0, planted: 0, bought: 0, unlocked: 0, skipped: 0, errors: 0 };
 
 async function farmWallet(w: Wallet): Promise<void> {
   const { client, account } = makeWallet(w.privateKey);
@@ -60,7 +60,7 @@ async function farmWallet(w: Wallet): Promise<void> {
     }
   }
 
-  const plotCount = Number(stats.plotCount);
+  let plotCount = Number(stats.plotCount);
   if (plotCount === 0) return;
 
   // Baca state semua plot
@@ -74,7 +74,7 @@ async function farmWallet(w: Wallet): Promise<void> {
   // Harvest semua plot yang sudah matang
   for (let i = 0; i < plots.length; i++) {
     const { cropId: cId, plantedAt } = plots[i];
-    if (cId === 0) continue; // kosong
+    if (cId === 0) continue;
 
     const readyAt = Number(plantedAt) + (GROW_TIMES[cId] ?? growTime);
     if (nowSec < readyAt) {
@@ -95,7 +95,31 @@ async function farmWallet(w: Wallet): Promise<void> {
     }
   }
 
-  // Baca ulang plot setelah harvest → cari yang kosong
+  // === Unlock plot baru jika SEED cukup ===
+  // Biaya unlock: nextUnlockCost (50 × plotCount saat ini)
+  // Syarat: punya SEED cukup untuk unlock DAN masih bisa replant semua plot
+  const [unlockCost, seedsAfterHarvest] = await Promise.all([
+    publicClient.readContract({ ...contract, functionName: "nextUnlockCost", args: [w.address] }),
+    publicClient.readContract({ ...contract, functionName: "seedBalance",    args: [w.address] }),
+  ]);
+
+  const replantReserve = BigInt(plotCount * seedCost);  // SEED minimum untuk replant semua plot
+
+  if (unlockCost > 0n && seedsAfterHarvest >= unlockCost + replantReserve) {
+    try {
+      const hash = await client.writeContract({
+        ...contract, functionName: "unlockPlot", account,
+      });
+      await publicClient.waitForTransactionReceipt({ hash });
+      plotCount++;
+      stat.unlocked++;
+      log(`#${w.index} ${short(w.address)}  unlockPlot → ${plotCount} plots (cost=${unlockCost} SEED)  ${hash}`);
+    } catch (e: any) {
+      log(`#${w.index} ${short(w.address)}  unlockPlot ❌ ${e.shortMessage ?? e.message}`);
+    }
+  }
+
+  // Baca ulang plot setelah harvest + unlock → cari yang kosong
   const plots2 = await publicClient.readContract({
     ...contract, functionName: "getPlots",
     args: [w.address, 0n, BigInt(plotCount)],
@@ -169,5 +193,5 @@ await pool(wallets, config.concurrency, async (w) => {
   }
 });
 
-const txTotal = stat.harvested + stat.planted + stat.bought;
-log(`Farm selesai. TX total=${txTotal} (harvest=${stat.harvested} plant=${stat.planted} buy=${stat.bought}) skipped=${stat.skipped} errors=${stat.errors}`);
+const txTotal = stat.harvested + stat.planted + stat.bought + stat.unlocked;
+log(`Farm selesai. TX total=${txTotal} (harvest=${stat.harvested} plant=${stat.planted} unlock=${stat.unlocked} buy=${stat.bought}) skipped=${stat.skipped} errors=${stat.errors}`);
