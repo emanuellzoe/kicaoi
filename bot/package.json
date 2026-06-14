@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "gen": "tsx src/gen.ts",
+    "gen:force": "tsx src/gen.ts --force",
     "distribute": "tsx src/distribute.ts",
     "status": "tsx src/status.ts",
     "seed-spam": "tsx src/seed-spam.ts",

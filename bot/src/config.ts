@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { fileURLToPath } from "url";
 import { parseEther, type Address } from "viem";
 import { resolveChain, type ChainName } from "./chains.js";
 
@@ -49,8 +50,8 @@ export const config = {
   gasPerPlant:        num(process.env.GAS_PER_PLANT, 100000),
   gasPerHarvest:      num(process.env.GAS_PER_HARVEST, 80000),
 
-  logFile: new URL("../farm-activity.log", import.meta.url).pathname,
+  logFile: fileURLToPath(new URL("../farm-activity.log", import.meta.url)),
 };
 
-export const WALLETS_FILE = new URL("../wallets.json", import.meta.url).pathname;
-export const PUBLIC_FILE  = new URL("../wallets.public.json", import.meta.url).pathname;
+export const WALLETS_FILE = fileURLToPath(new URL("../wallets.json", import.meta.url));
+export const PUBLIC_FILE  = fileURLToPath(new URL("../wallets.public.json", import.meta.url));
