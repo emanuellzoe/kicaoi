@@ -21,6 +21,12 @@ cp .env.local.example .env.local
 npm run dev        # http://localhost:3000
 ```
 
+## Deploy to Vercel
+
+- **Root Directory:** `frontend`
+- **Framework Preset:** Next.js (Project Settings → Build and Deployment; `vercel.json` also pins `"framework": "nextjs"`)
+- **Env:** `NEXT_PUBLIC_CHAIN_ID=42220` (mainnet) — the contract address resolves from `lib/deployments.ts`.
+
 ## Env
 
 | Var | Meaning |
