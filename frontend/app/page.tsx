@@ -4,15 +4,18 @@ import { useEffect, useMemo, useState } from "react";
 import {
   useAccount,
   useBalance,
+  useChainId,
   useConnect,
   useDisconnect,
   useReadContract,
+  useSwitchChain,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { formatEther, parseEther } from "viem";
 import { useMiniPay } from "@/hooks/useMiniPay";
+import { activeChain } from "@/lib/chain";
 import { CROPS, cropById, KICAOI_ABI, KICAOI_ADDRESS } from "@/lib/contract";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
@@ -22,8 +25,11 @@ export default function Page() {
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
+  const chainId = useChainId();
+  const { switchChain, isPending: switching } = useSwitchChain();
 
   const configured = KICAOI_ADDRESS.toLowerCase() !== ZERO;
+  const wrongChain = isConnected && chainId !== activeChain.id;
 
   return (
     <main className="shell">
@@ -55,6 +61,19 @@ export default function Page() {
               Connect Wallet
             </button>
           )}
+        </div>
+      ) : wrongChain ? (
+        <div className="card center">
+          <div className="warn">
+            Your wallet is on the wrong network. Kicaoi runs on <b>{activeChain.name}</b>.
+          </div>
+          <button
+            className="fullw"
+            disabled={switching}
+            onClick={() => switchChain({ chainId: activeChain.id })}
+          >
+            {switching ? "Switching…" : `Switch to ${activeChain.name}`}
+          </button>
         </div>
       ) : (
         <Farm address={address as `0x${string}`} enabled={configured} />
