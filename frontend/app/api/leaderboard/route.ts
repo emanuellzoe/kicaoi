@@ -1,4 +1,4 @@
-// Leaderboard indexer — Next.js Route Handler
+﻿// Leaderboard indexer — Next.js Route Handler
 // Chunks getLogs into 50k-block batches, multicalls getStats in groups of 100.
 // force-dynamic: never statically pre-render at build time (blockchain fetch would timeout)
 export const dynamic = "force-dynamic";
@@ -137,4 +137,4 @@ export async function GET() {
 }
 
 
-// [lb-api-v] 1
+// [lb-api-v] 2
