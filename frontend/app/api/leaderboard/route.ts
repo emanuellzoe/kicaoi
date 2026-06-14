@@ -135,3 +135,6 @@ export async function GET() {
     return Response.json({ error: "Failed to load leaderboard" }, { status: 500 });
   }
 }
+
+
+// [lb-api-v] 1
