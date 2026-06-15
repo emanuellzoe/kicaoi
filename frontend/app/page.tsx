@@ -18,13 +18,10 @@ import { formatEther, parseEther } from "viem";
 import { useMiniPay } from "@/hooks/useMiniPay";
 import { activeChain } from "@/lib/chain";
 import { CROPS, cropById, CUSD_ADDRESS, KICAOI_ABI, KICAOI_ADDRESS } from "@/lib/contract";
-import { BlurText } from "@/components/BlurText";
+import { evaluateAchievements, type AchievementState } from "@/lib/achievements";
+import { Landing } from "@/components/landing/Landing";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
-
-function shorten(addr: string) {
-  return addr.slice(0, 6) + "…" + addr.slice(-4);
-}
 
 export default function Page() {
   const { isMiniPay } = useMiniPay();
@@ -32,140 +29,72 @@ export default function Page() {
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
   const chainId = useChainId();
-  const { switchChain, isPending: switching } = useSwitchChain();
+  const { switchChain, switchChainAsync, isPending: switching } = useSwitchChain();
 
   const configured = KICAOI_ADDRESS.toLowerCase() !== ZERO;
   const wrongChain = isConnected && chainId !== activeChain.id;
 
-  if (!isConnected) {
-    return <HeroSection onConnect={() => connect({ connector: injected() })} isMiniPay={isMiniPay} />;
-  }
+  // Auto-switch to Celo as soon as a wrong-network wallet is detected.
+  // The manual button below is a fallback if the wallet rejects the auto-switch.
+  useEffect(() => {
+    if (wrongChain) switchChainAsync({ chainId: activeChain.id }).catch(() => {});
+  }, [wrongChain, switchChainAsync]);
 
   return (
-    <>
-      <div className="hero-bg" />
-      <nav className="kicaoi-nav lg">
-        <div className="nav-logo">
-          <span>🌱</span>
-          Kicaoi
+    <main className="shell">
+      <header className="brand">
+        <div>
+          <h1>🌱 Kicaoi</h1>
+          <div className="tag">Plant · Wait · Harvest — on Celo</div>
         </div>
-        <div className="nav-actions">
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           <Link href="/leaderboard" className="nav-link">🏆</Link>
-          {!isMiniPay && address && (
-            <button
-              className="secondary"
-              style={{ fontSize: "11px", padding: "7px 12px", borderRadius: "10px" }}
-              onClick={() => disconnect()}
-            >
-              {shorten(address)}
+          {isConnected && !isMiniPay && (
+            <button className="secondary" onClick={() => disconnect()}>
+              Disconnect
             </button>
           )}
         </div>
-      </nav>
+      </header>
 
-      <main className="shell">
-        {!configured && (
-          <div className="warn fade-up">
-            Contract address not set. Add{" "}
-            <span className="mono">NEXT_PUBLIC_KICAOI_CONTRACT_ADDRESS</span> to{" "}
-            <span className="mono">.env.local</span> after deploying.
+      {!configured && (
+        <div className="warn">
+          Contract address not set. Add <span className="mono">NEXT_PUBLIC_KICAOI_CONTRACT_ADDRESS</span>{" "}
+          to <span className="mono">.env.local</span> after deploying.
+        </div>
+      )}
+
+      {!isConnected ? (
+        <Landing
+          showConnect={!isMiniPay}
+          onConnect={() => connect({ connector: injected(), chainId: activeChain.id })}
+        />
+      ) : wrongChain ? (
+        <div className="card center">
+          <div className="warn">
+            Your wallet is on the wrong network. Kicaoi runs on <b>{activeChain.name}</b>.
           </div>
-        )}
+          <button
+            className="fullw"
+            disabled={switching}
+            onClick={() => switchChain({ chainId: activeChain.id })}
+          >
+            {switching ? "Switching…" : `Switch to ${activeChain.name}`}
+          </button>
+        </div>
+      ) : (
+        <Farm address={address as `0x${string}`} enabled={configured} isMiniPay={isMiniPay} />
+      )}
 
-        {wrongChain ? (
-          <div className="card lg fade-up" style={{ textAlign: "center", padding: "28px 16px" }}>
-            <div className="warn" style={{ marginBottom: "14px" }}>
-              Your wallet is on the wrong network. Kicaoi runs on{" "}
-              <b>{activeChain.name}</b>.
-            </div>
-            <button
-              className="fullw"
-              disabled={switching}
-              onClick={() => switchChain({ chainId: activeChain.id })}
-            >
-              {switching ? "Switching…" : `Switch to ${activeChain.name}`}
-            </button>
-          </div>
-        ) : (
-          <Farm address={address as `0x${string}`} enabled={configured} isMiniPay={isMiniPay} />
-        )}
-
-        <p className="note center mt" style={{ paddingBottom: "20px" }}>
-          SEED is an in-game credit (1 CELO = 100 SEED). Not redeemable for CELO.
+      {isConnected && (
+        <p className="note center mt">
+          SEED is an in-game credit (1 CELO = 100 SEED). It is not redeemable for CELO.
         </p>
-      </main>
-    </>
+      )}
+    </main>
   );
 }
 
-/* ─── HERO (disconnected) ─────────────────────────────────────── */
-function HeroSection({
-  onConnect,
-  isMiniPay,
-}: {
-  onConnect: () => void;
-  isMiniPay: boolean;
-}) {
-  return (
-    <>
-      <div className="hero-bg" />
-      <nav className="kicaoi-nav lg">
-        <div className="nav-logo">
-          <span>🌱</span>
-          Kicaoi
-        </div>
-        <Link href="/leaderboard" className="nav-link">🏆 Leaderboard</Link>
-      </nav>
-
-      <section className="hero-section">
-        <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
-          <div className="fade-up-1" style={{ display: "flex", justifyContent: "center" }}>
-            <span className="hero-eyebrow lg">
-              🌍 Onchain · Celo Network
-            </span>
-          </div>
-
-          <div className="fade-up-2" style={{ marginBottom: "20px" }}>
-            <BlurText
-              text="Kicaoi Farm"
-              className="hero-title font-heading"
-              delay={0.25}
-              stagger={0.12}
-            />
-          </div>
-
-          <p className="hero-sub fade-up-3">
-            Plant crops. Watch them grow. Harvest rewards — fully onchain on Celo.
-          </p>
-
-          <div className="feature-grid fade-up-4">
-            {CROPS.map((crop) => (
-              <div key={crop.id} className="feature-card lg">
-                <div className="feature-emoji">{crop.emoji}</div>
-                <div className="feature-name">{crop.name}</div>
-                <div className="feature-detail">
-                  {crop.cost} SEED<br />
-                  {crop.growMins}m grow<br />
-                  +{crop.yield} yield
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {!isMiniPay && (
-            <div className="fade-up-5" style={{ display: "flex", justifyContent: "center" }}>
-              <button className="hero-cta" onClick={onConnect}>
-                Connect Wallet to Farm
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
-    </>
-  );
-}
-
-/* ─── FARM (connected) ────────────────────────────────────────── */
 function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled: boolean; isMiniPay: boolean }) {
   const base = { address: KICAOI_ADDRESS, abi: KICAOI_ABI, chainId: activeChain.id } as const;
   const query = { enabled } as const;
@@ -201,6 +130,20 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
   const busy = isPending || receipt.isLoading;
   const seedBal = seed.data ? Number(seed.data) : 0;
 
+  // Achievements derive from on-chain stats only — no extra reads.
+  const achievements = useMemo(
+    () =>
+      stats.data
+        ? evaluateAchievements({
+            plotCount: Number(stats.data.plotCount),
+            totalPlanted: Number(stats.data.totalPlanted),
+            totalHarvested: Number(stats.data.totalHarvested),
+            totalSeedHarvested: Number(stats.data.totalSeedHarvested),
+          })
+        : [],
+    [stats.data]
+  );
+
   // When inside MiniPay, pay gas in cUSD instead of native CELO (Celo CIP-64).
   // Users only need a tiny cUSD balance — no CELO required.
   const feeCurrency = isMiniPay ? CUSD_ADDRESS[activeChain.id] : undefined;
@@ -229,8 +172,7 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
 
   return (
     <>
-      {/* Balances */}
-      <div className="card lg balances fade-up-1">
+      <div className="card balances">
         <div className="stat">
           <div className="label">CELO</div>
           <div className="value">
@@ -243,12 +185,9 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
         </div>
       </div>
 
-      {/* Buy SEED */}
-      <div className="card lg fade-up-2">
-        <div className="section-label lg" style={{ marginBottom: "10px" }}>
-          Buy SEED
-        </div>
-        <div className="row">
+      <div className="card">
+        <div className="label note">Buy SEED with CELO</div>
+        <div className="row mt">
           <input
             type="number"
             min="0"
@@ -259,26 +198,19 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
           <button
             disabled={busy || !amount || Number(amount) <= 0}
             onClick={() => send("buySeeds", [], parseEther(amount || "0"))}
-            style={{ whiteSpace: "nowrap", flexShrink: 0 }}
           >
             Buy
           </button>
         </div>
-        <div className="note mt">
-          {amount && Number(amount) > 0 ? `≈ ${Math.floor(Number(amount) * 100)} SEED` : "1 CELO = 100 SEED"}
-        </div>
+        <div className="note mt">{amount ? `≈ ${Math.floor(Number(amount) * 100)} SEED` : ""}</div>
       </div>
 
-      {/* Plots */}
-      <div className="card lg fade-up-3">
+      <div className="card">
         <div className="row">
-          <div className="section-label lg">
-            Your Plots ({plotCount})
-          </div>
+          <div className="label note">Your plots ({plotCount})</div>
           <div style={{ display: "flex", gap: "6px" }}>
             {readyPlotIds.length > 1 && (
               <button
-                style={{ fontSize: "12px", padding: "7px 12px", borderRadius: "10px", background: "var(--accent)", color: "#fff" }}
                 disabled={busy}
                 onClick={() => send("batchHarvest", [readyPlotIds])}
               >
@@ -287,7 +219,6 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
             )}
             <button
               className="secondary"
-              style={{ fontSize: "12px", padding: "7px 12px", borderRadius: "10px" }}
               disabled={busy || seedBal < Number(unlockCost.data ?? 0n) || plotCount === 0}
               onClick={() => send("unlockPlot", [])}
             >
@@ -297,11 +228,9 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
         </div>
 
         {plotCount === 0 ? (
-          <p className="note mt" style={{ textAlign: "center", padding: "16px 0" }}>
-            Buy SEED once to receive your first 3 plots. 🌱
-          </p>
+          <p className="note mt">Buy SEED once to receive your first 3 plots.</p>
         ) : (
-          <div className="plots">
+          <div className="plots mt">
             {Array.from({ length: plotCount }).map((_, i) => (
               <PlotCard
                 key={i}
@@ -318,16 +247,39 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
         )}
       </div>
 
-      {busy && (
-        <p className="note center fade-up" style={{ marginTop: "8px" }}>
-          ⏳ Confirming transaction…
-        </p>
-      )}
+      {achievements.length > 0 && <Achievements items={achievements} />}
+
+      {busy && <p className="note center">Confirming transaction…</p>}
     </>
   );
 }
 
-/* ─── PLOT CARD ───────────────────────────────────────────────── */
+function Achievements({ items }: { items: AchievementState[] }) {
+  const unlocked = items.filter((a) => a.unlocked).length;
+  return (
+    <div className="card">
+      <div className="label note">
+        Achievements ({unlocked}/{items.length})
+      </div>
+      <div className="achievements mt">
+        {items.map((a) => (
+          <div key={a.id} className={`badge ${a.unlocked ? "unlocked" : "locked"}`} title={a.desc}>
+            <div className="badge-emoji">{a.emoji}</div>
+            <div className="badge-name">{a.name}</div>
+            {a.unlocked ? (
+              <div className="badge-desc">{a.desc}</div>
+            ) : (
+              <div className="badge-bar">
+                <span style={{ width: `${Math.round(a.progress * 100)}%` }} />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function PlotCard({
   plotId,
   cropId,
@@ -370,12 +322,12 @@ function PlotCard({
   ).padStart(2, "0")}`;
 
   return (
-    <div className={`plot lg${ready ? " ready" : ""}`}>
+    <div className={`plot ${ready ? "ready" : ""}`}>
       <div className="emoji">{empty ? "🟫" : crop?.emoji}</div>
 
       {empty ? (
         <>
-          <div className="state">Plot #{plotId + 1} · empty</div>
+          <div className="state">Plot #{plotId} · empty</div>
           <div className="crop-pick">
             {CROPS.map((c) => (
               <button
@@ -389,7 +341,6 @@ function PlotCard({
           </div>
           <button
             className="mt"
-            style={{ fontSize: "12px", padding: "8px 6px" }}
             disabled={busy || seedBal < (cropById(pick)?.cost ?? 0)}
             onClick={() => onPlant(pick)}
           >
@@ -399,15 +350,10 @@ function PlotCard({
       ) : (
         <>
           <div className="state">
-            {crop?.name} · {ready ? "✅ ready!" : mmss}
+            {crop?.name} · {ready ? "ready!" : mmss}
           </div>
-          <button
-            className="mt"
-            style={{ fontSize: "12px", padding: "8px 6px" }}
-            disabled={busy || !ready}
-            onClick={onHarvest}
-          >
-            {ready ? `Harvest +${crop?.yield}` : "Growing…"}
+          <button className="mt" disabled={busy || !ready} onClick={onHarvest}>
+            {ready ? `Harvest (+${crop?.yield})` : "Growing…"}
           </button>
         </>
       )}

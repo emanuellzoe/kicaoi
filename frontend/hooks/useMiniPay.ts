@@ -2,9 +2,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useConnect } from "wagmi";
 import { injected } from "wagmi/connectors";
+import { activeChain } from "@/lib/chain";
 
 // Detect MiniPay and auto-connect. Inside MiniPay there is no Connect button:
-// the wallet is already there, so we just connect the injected provider.
+// the wallet is already there, so we just connect the injected provider and
+// pin Celo so the session never starts on the wrong chain.
 export function useMiniPay() {
   const [isMiniPay, setIsMiniPay] = useState(false);
   const { connect } = useConnect();
@@ -17,7 +19,7 @@ export function useMiniPay() {
       if (eth?.isMiniPay) {
         attempted.current = true;
         setIsMiniPay(true);
-        connect({ connector: injected() });
+        connect({ connector: injected(), chainId: activeChain.id });
       }
     };
 
