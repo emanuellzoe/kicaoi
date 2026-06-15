@@ -319,12 +319,16 @@ function PlotCard({
     return Math.max(0, plantedAt + crop.growMins * 60 - now);
   }, [empty, crop, now, plantedAt]);
 
-  const mmss = `${String(Math.floor(remaining / 60)).padStart(2, "0")}:${String(
-    remaining % 60
-  ).padStart(2, "0")}`;
+  const growProgress = useMemo(() => {
+    if (empty || !crop || plantedAt === 0) return 0;
+    const total = crop.growMins * 60;
+    return Math.min(1, (now - plantedAt) / total);
+  }, [empty, crop, now, plantedAt]);
+
+  const soon = !ready && !empty && growProgress >= 0.8;
 
   return (
-    <div className={`plot ${ready ? "ready" : ""}`}>
+    <div className={`plot ${ready ? "ready" : soon ? "soon" : ""}`}>
       <div className="emoji">{empty ? "🟫" : crop?.emoji}</div>
 
       {empty ? (
@@ -352,10 +356,14 @@ function PlotCard({
       ) : (
         <>
           <div className="state">
-            {crop?.name} · {ready ? "ready!" : mmss}
+            {crop?.name} · {ready ? "✅ ready!" : soon ? `⚡ ${formatCountdown(remaining)}` : formatCountdown(remaining)}
           </div>
+          {!ready && plantedAt > 0 && (
+            <div className="timer-hint">ready at {formatHarvestTime(plantedAt, crop?.growMins ?? 0)}</div>
+          )}
+          <GrowthBar progress={ready ? 1 : growProgress} />
           <button className="mt" disabled={busy || !ready} onClick={onHarvest}>
-            {ready ? `Harvest (+${crop?.yield})` : "Growing…"}
+            {ready ? `Harvest (+${crop?.yield} SEED)` : "Growing…"}
           </button>
         </>
       )}
