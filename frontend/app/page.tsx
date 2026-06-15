@@ -156,8 +156,18 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
   // Users only need a tiny cUSD balance — no CELO required.
   const feeCurrency = isMiniPay ? CUSD_ADDRESS[activeChain.id] : undefined;
 
-  const send = (functionName: string, args: unknown[], value?: bigint) =>
+  const PENDING_MSGS: Record<string, string> = {
+    buySeeds: "Buying SEED…",
+    plant: "Planting crop…",
+    harvest: "Harvesting…",
+    batchHarvest: "Harvesting all plots…",
+    unlockPlot: "Unlocking plot…",
+  };
+
+  const send = (functionName: string, args: unknown[], value?: bigint) => {
+    addToast("info", PENDING_MSGS[functionName] ?? "Sending transaction…");
     (writeContract as any)({ ...base, functionName, args, value, ...(feeCurrency ? { feeCurrency } : {}) });
+  };
 
   const [amount, setAmount] = useState("0.1");
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
