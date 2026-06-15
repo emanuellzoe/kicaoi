@@ -27,10 +27,17 @@ export default function Page() {
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
   const chainId = useChainId();
-  const { switchChain, isPending: switching } = useSwitchChain();
+  const { switchChain, switchChainAsync, isPending: switching } = useSwitchChain();
 
   const configured = KICAOI_ADDRESS.toLowerCase() !== ZERO;
   const wrongChain = isConnected && chainId !== activeChain.id;
+
+  // As soon as the wallet is connected on the wrong network, move it to Celo
+  // automatically (first connect or later network drift). The manual button
+  // below is a fallback if the wallet rejects the auto-switch.
+  useEffect(() => {
+    if (wrongChain) switchChainAsync({ chainId: activeChain.id }).catch(() => {});
+  }, [wrongChain, switchChainAsync]);
 
   return (
     <main className="shell">
@@ -61,7 +68,10 @@ export default function Page() {
           <p className="note">Connect your wallet to start farming.</p>
           {/* Inside MiniPay this auto-connects and the button stays hidden */}
           {!isMiniPay && (
-            <button className="fullw mt" onClick={() => connect({ connector: injected() })}>
+            <button
+              className="fullw mt"
+              onClick={() => connect({ connector: injected(), chainId: activeChain.id })}
+            >
               Connect Wallet
             </button>
           )}
