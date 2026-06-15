@@ -20,6 +20,7 @@ import { activeChain } from "@/lib/chain";
 import { CROPS, cropById, CUSD_ADDRESS, KICAOI_ABI, KICAOI_ADDRESS } from "@/lib/contract";
 import { evaluateAchievements, type AchievementState } from "@/lib/achievements";
 import { Landing } from "@/components/landing/Landing";
+import { useToast } from "@/lib/toast";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
 
@@ -112,7 +113,8 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
     query: { enabled: enabled && plotCount > 0 },
   });
 
-  const { writeContract, data: txHash, isPending, reset } = useWriteContract();
+  const { addToast } = useToast();
+  const { writeContract, data: txHash, isPending, reset, error: writeError } = useWriteContract();
   const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
   useEffect(() => {
@@ -123,9 +125,15 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
       unlockCost.refetch();
       plots.refetch();
       reset();
+      addToast("success", "Transaction confirmed!");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [receipt.isSuccess]);
+
+  useEffect(() => {
+    if (writeError) addToast("error", "Transaction rejected.");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [writeError]);
 
   const busy = isPending || receipt.isLoading;
   const seedBal = seed.data ? Number(seed.data) : 0;
@@ -148,8 +156,18 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
   // Users only need a tiny cUSD balance — no CELO required.
   const feeCurrency = isMiniPay ? CUSD_ADDRESS[activeChain.id] : undefined;
 
-  const send = (functionName: string, args: unknown[], value?: bigint) =>
+  const PENDING_MSGS: Record<string, string> = {
+    buySeeds: "Buying SEED…",
+    plant: "Planting crop…",
+    harvest: "Harvesting…",
+    batchHarvest: "Harvesting all plots…",
+    unlockPlot: "Unlocking plot…",
+  };
+
+  const send = (functionName: string, args: unknown[], value?: bigint) => {
+    addToast("info", PENDING_MSGS[functionName] ?? "Sending transaction…");
     (writeContract as any)({ ...base, functionName, args, value, ...(feeCurrency ? { feeCurrency } : {}) });
+  };
 
   const [amount, setAmount] = useState("0.1");
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
