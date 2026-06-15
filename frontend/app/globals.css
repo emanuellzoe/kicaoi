@@ -542,3 +542,5 @@ a.nav-link {
   0%, 100% { filter: drop-shadow(0 0 0px transparent); }
   50%       { filter: drop-shadow(0 0 8px #fcff52aa); }
 }
+
+.timer-hint { font-size: 10px; color: var(--muted); margin-top: 2px; }
