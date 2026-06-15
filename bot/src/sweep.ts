@@ -54,4 +54,4 @@ for (const w of wallets) {
 log(`Sweep selesai. total=${formatEther(stat.swept)} CELO skipped=${stat.skipped} errors=${stat.errors}`);
 
 
-// [sweep-v] 2
+// [sweep-v] 3
