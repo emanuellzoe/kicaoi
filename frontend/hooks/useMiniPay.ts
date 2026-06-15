@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useConnect } from "wagmi";
 import { injected } from "wagmi/connectors";
 
@@ -8,14 +8,25 @@ import { injected } from "wagmi/connectors";
 export function useMiniPay() {
   const [isMiniPay, setIsMiniPay] = useState(false);
   const { connect } = useConnect();
+  const attempted = useRef(false);
 
   useEffect(() => {
-    const eth = typeof window !== "undefined" ? (window as any).ethereum : undefined;
-    if (eth?.isMiniPay) {
-      setIsMiniPay(true);
-      connect({ connector: injected() });
-    }
-  }, [connect]);
+    const tryConnect = () => {
+      if (attempted.current) return;
+      const eth = (window as any).ethereum;
+      if (eth?.isMiniPay) {
+        attempted.current = true;
+        setIsMiniPay(true);
+        connect({ connector: injected() });
+      }
+    };
+
+    // Try immediately, then retry once after a short delay in case
+    // MiniPay injects window.ethereum slightly after mount.
+    tryConnect();
+    const t = setTimeout(tryConnect, 500);
+    return () => clearTimeout(t);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return { isMiniPay };
 }
