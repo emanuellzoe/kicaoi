@@ -1,4 +1,4 @@
-// Kumpulkan semua CELO dari wallet bot ke satu alamat tujuan.
+﻿// Kumpulkan semua CELO dari wallet bot ke satu alamat tujuan.
 // Jalankan SEBELUM npm run gen --force agar dana tidak hilang.
 //
 //   SWEEP_TO=0x... npm run sweep
@@ -54,4 +54,4 @@ for (const w of wallets) {
 log(`Sweep selesai. total=${formatEther(stat.swept)} CELO skipped=${stat.skipped} errors=${stat.errors}`);
 
 
-// [sweep-v] 1
+// [sweep-v] 2
