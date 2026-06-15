@@ -17,7 +17,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const addToast = useCallback((type: ToastType, message: string) => {
     const id = `toast-${++counter}`;
-    setToasts((prev) => [...prev.slice(-4), { id, type, message }]);
+    setToasts((prev) => {
+      // Deduplicate: replace existing toast with same message instead of stacking
+      const deduped = prev.filter((t) => t.message !== message);
+      return [...deduped.slice(-3), { id, type, message }];
+    });
     timers.current.set(id, setTimeout(() => removeToast(id), 4000));
   }, [removeToast]);
 
