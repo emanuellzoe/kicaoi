@@ -18,6 +18,7 @@ import { formatEther, parseEther } from "viem";
 import { useMiniPay } from "@/hooks/useMiniPay";
 import { activeChain } from "@/lib/chain";
 import { CROPS, cropById, KICAOI_ABI, KICAOI_ADDRESS } from "@/lib/contract";
+import { evaluateAchievements, type AchievementState } from "@/lib/achievements";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
 
@@ -139,6 +140,20 @@ function Farm({ address, enabled }: { address: `0x${string}`; enabled: boolean }
   const busy = isPending || receipt.isLoading;
   const seedBal = seed.data ? Number(seed.data) : 0;
 
+  // Achievements derive from on-chain stats only — no extra reads.
+  const achievements = useMemo(
+    () =>
+      stats.data
+        ? evaluateAchievements({
+            plotCount: Number(stats.data.plotCount),
+            totalPlanted: Number(stats.data.totalPlanted),
+            totalHarvested: Number(stats.data.totalHarvested),
+            totalSeedHarvested: Number(stats.data.totalSeedHarvested),
+          })
+        : [],
+    [stats.data]
+  );
+
   // Loosely typed wrapper so the UI stays simple; the ABI is the source of truth.
   const send = (functionName: string, args: unknown[], value?: bigint) =>
     (writeContract as any)({ ...base, functionName, args, value });
@@ -213,8 +228,36 @@ function Farm({ address, enabled }: { address: `0x${string}`; enabled: boolean }
         )}
       </div>
 
+      {achievements.length > 0 && <Achievements items={achievements} />}
+
       {busy && <p className="note center">Confirming transaction…</p>}
     </>
+  );
+}
+
+function Achievements({ items }: { items: AchievementState[] }) {
+  const unlocked = items.filter((a) => a.unlocked).length;
+  return (
+    <div className="card">
+      <div className="label note">
+        Achievements ({unlocked}/{items.length})
+      </div>
+      <div className="achievements mt">
+        {items.map((a) => (
+          <div key={a.id} className={`badge ${a.unlocked ? "unlocked" : "locked"}`} title={a.desc}>
+            <div className="badge-emoji">{a.emoji}</div>
+            <div className="badge-name">{a.name}</div>
+            {a.unlocked ? (
+              <div className="badge-desc">{a.desc}</div>
+            ) : (
+              <div className="badge-bar">
+                <span style={{ width: `${Math.round(a.progress * 100)}%` }} />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
