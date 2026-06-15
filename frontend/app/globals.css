@@ -177,3 +177,64 @@ input {
 .fullw {
   width: 100%;
 }
+
+/* Nav link (leaderboard ↔ farm) */
+a.nav-link {
+  background: #243018;
+  color: var(--text);
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* Leaderboard rows */
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid #243018;
+}
+.lb-row:last-child {
+  border-bottom: none;
+}
+.lb-me {
+  background: #1a2f14;
+}
+.lb-rank {
+  font-size: 15px;
+  font-weight: 700;
+  min-width: 34px;
+  text-align: center;
+  color: var(--muted);
+}
+.lb-addr {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  flex: 1;
+  color: var(--text);
+}
+.lb-you {
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  background: var(--green);
+  color: #06210f;
+  border-radius: 6px;
+  padding: 1px 6px;
+  margin-left: 6px;
+  font-weight: 700;
+}
+.lb-stats {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lb-seed {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--green);
+}

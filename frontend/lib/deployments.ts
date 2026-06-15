@@ -5,7 +5,7 @@ export type Deployment = {
   chainId: number;
   address: `0x${string}`;
   explorer: string;
-  startBlock?: number;
+  startBlock?: bigint;
 };
 
 export const DEPLOYMENTS: Record<number, Deployment> = {
@@ -20,6 +20,7 @@ export const DEPLOYMENTS: Record<number, Deployment> = {
     chainId: 42220,
     address: "0xb8Fb82C02acCbb0cbE613e3633781a67438563d9",
     explorer: "https://celoscan.io",
+    startBlock: 38700000n, // approx deployment block — verify at celoscan.io
   },
 };
 

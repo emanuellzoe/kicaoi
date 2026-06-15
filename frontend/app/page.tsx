@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   useAccount,
   useBalance,
@@ -38,11 +39,14 @@ export default function Page() {
           <h1>🌱 Kicaoi</h1>
           <div className="tag">Plant · Wait · Harvest — on Celo</div>
         </div>
-        {isConnected && !isMiniPay && (
-          <button className="secondary" onClick={() => disconnect()}>
-            Disconnect
-          </button>
-        )}
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <Link href="/leaderboard" className="nav-link">🏆</Link>
+          {isConnected && !isMiniPay && (
+            <button className="secondary" onClick={() => disconnect()}>
+              Disconnect
+            </button>
+          )}
+        </div>
       </header>
 
       {!configured && (
