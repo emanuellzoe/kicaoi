@@ -238,3 +238,51 @@ a.nav-link {
   font-size: 14px;
   color: var(--green);
 }
+
+/* Achievements */
+.achievements {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+}
+.badge {
+  background: var(--surface);
+  border: 1px solid #243018;
+  border-radius: 12px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.badge.locked {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+.badge.unlocked {
+  border-color: var(--green);
+}
+.badge-emoji {
+  font-size: 26px;
+  line-height: 1;
+}
+.badge-name {
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+.badge-desc {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+.badge-bar {
+  height: 4px;
+  background: #243018;
+  border-radius: 999px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.badge-bar span {
+  display: block;
+  height: 100%;
+  background: var(--green);
+}
