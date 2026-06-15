@@ -17,7 +17,7 @@ import { injected } from "wagmi/connectors";
 import { formatEther, parseEther } from "viem";
 import { useMiniPay } from "@/hooks/useMiniPay";
 import { activeChain } from "@/lib/chain";
-import { CROPS, cropById, KICAOI_ABI, KICAOI_ADDRESS } from "@/lib/contract";
+import { CROPS, cropById, CUSD_ADDRESS, KICAOI_ABI, KICAOI_ADDRESS } from "@/lib/contract";
 import { BlurText } from "@/components/BlurText";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
@@ -87,7 +87,7 @@ export default function Page() {
             </button>
           </div>
         ) : (
-          <Farm address={address as `0x${string}`} enabled={configured} />
+          <Farm address={address as `0x${string}`} enabled={configured} isMiniPay={isMiniPay} />
         )}
 
         <p className="note center mt" style={{ paddingBottom: "20px" }}>
@@ -166,7 +166,7 @@ function HeroSection({
 }
 
 /* ─── FARM (connected) ────────────────────────────────────────── */
-function Farm({ address, enabled }: { address: `0x${string}`; enabled: boolean }) {
+function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled: boolean; isMiniPay: boolean }) {
   const base = { address: KICAOI_ADDRESS, abi: KICAOI_ABI, chainId: activeChain.id } as const;
   const query = { enabled } as const;
 
@@ -201,10 +201,31 @@ function Farm({ address, enabled }: { address: `0x${string}`; enabled: boolean }
   const busy = isPending || receipt.isLoading;
   const seedBal = seed.data ? Number(seed.data) : 0;
 
+  // When inside MiniPay, pay gas in cUSD instead of native CELO (Celo CIP-64).
+  // Users only need a tiny cUSD balance — no CELO required.
+  const feeCurrency = isMiniPay ? CUSD_ADDRESS[activeChain.id] : undefined;
+
   const send = (functionName: string, args: unknown[], value?: bigint) =>
-    (writeContract as any)({ ...base, functionName, args, value });
+    (writeContract as any)({ ...base, functionName, args, value, ...(feeCurrency ? { feeCurrency } : {}) });
 
   const [amount, setAmount] = useState("0.1");
+  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
+  useEffect(() => {
+    const t = setInterval(() => setNow(Math.floor(Date.now() / 1000)), 5000);
+    return () => clearInterval(t);
+  }, []);
+
+  const readyPlotIds: bigint[] = useMemo(() => {
+    if (!plots.data) return [];
+    const ids: bigint[] = [];
+    for (let i = 0; i < plotCount; i++) {
+      const p = plots.data[i];
+      if (!p || p.cropId === 0) continue;
+      const crop = cropById(Number(p.cropId));
+      if (crop && now >= Number(p.plantedAt) + crop.growMins * 60) ids.push(BigInt(i));
+    }
+    return ids;
+  }, [plots.data, plotCount, now]);
 
   return (
     <>
@@ -254,14 +275,25 @@ function Farm({ address, enabled }: { address: `0x${string}`; enabled: boolean }
           <div className="section-label lg">
             Your Plots ({plotCount})
           </div>
-          <button
-            className="secondary"
-            style={{ fontSize: "12px", padding: "7px 12px", borderRadius: "10px" }}
-            disabled={busy || seedBal < Number(unlockCost.data ?? 0n) || plotCount === 0}
-            onClick={() => send("unlockPlot", [])}
-          >
-            + Plot ({unlockCost.data ? Number(unlockCost.data) : "…"} SEED)
-          </button>
+          <div style={{ display: "flex", gap: "6px" }}>
+            {readyPlotIds.length > 1 && (
+              <button
+                style={{ fontSize: "12px", padding: "7px 12px", borderRadius: "10px", background: "var(--accent)", color: "#fff" }}
+                disabled={busy}
+                onClick={() => send("batchHarvest", [readyPlotIds])}
+              >
+                Harvest All ({readyPlotIds.length})
+              </button>
+            )}
+            <button
+              className="secondary"
+              style={{ fontSize: "12px", padding: "7px 12px", borderRadius: "10px" }}
+              disabled={busy || seedBal < Number(unlockCost.data ?? 0n) || plotCount === 0}
+              onClick={() => send("unlockPlot", [])}
+            >
+              + Plot ({unlockCost.data ? Number(unlockCost.data) : "…"} SEED)
+            </button>
+          </div>
         </div>
 
         {plotCount === 0 ? (

@@ -219,6 +219,76 @@ contract KicaoiFarm is Ownable, ReentrancyGuard {
         emit PlotUnlocked(msg.sender, count + 1, cost);
     }
 
+    /**
+     * @notice Harvest all ready plots in a single transaction.
+     * @dev Skips empty or unripe plots — reverts only if nothing was harvested.
+     *      Reduces TX count from N to 1 for multi-plot harvests.
+     */
+    function batchHarvest(uint256[] calldata plotIds) external {
+        PlayerStats storage s = stats[msg.sender];
+        uint256 totalYield;
+        uint64 harvestCount;
+
+        for (uint256 i = 0; i < plotIds.length; ++i) {
+            uint256 plotId = plotIds[i];
+            if (plotId >= s.plotCount) revert PlotOutOfRange();
+
+            Plot storage p = plots[msg.sender][plotId];
+            uint8 cropId = p.cropId;
+            if (cropId == 0) continue; // skip empty
+
+            CropConfig memory c = crops[cropId];
+            // forge-lint: disable-next-line(block-timestamp)
+            if (block.timestamp < uint256(p.plantedAt) + c.growTime) continue; // skip unripe
+
+            p.cropId = 0;
+            p.plantedAt = 0;
+            totalYield += c.yieldAmount;
+            unchecked { harvestCount += 1; s.totalSeedHarvested += c.yieldAmount; }
+            emit Harvested(msg.sender, plotId, cropId, c.yieldAmount);
+        }
+
+        require(harvestCount > 0, "nothing ready");
+        seedBalance[msg.sender] += totalYield;
+        unchecked { s.totalHarvested += harvestCount; }
+    }
+
+    /**
+     * @notice Plant multiple plots in a single transaction.
+     * @dev Validates all plots first, then deducts total SEED cost and plants.
+     *      Caller must not pass duplicate plotIds.
+     */
+    function batchPlant(uint256[] calldata plotIds, uint8[] calldata cropIds) external {
+        uint256 len = plotIds.length;
+        require(len == cropIds.length && len > 0, "invalid args");
+
+        PlayerStats storage s = stats[msg.sender];
+        uint256 totalCost;
+
+        // Validate pass: check crops and plots, accumulate cost.
+        for (uint256 i = 0; i < len; ++i) {
+            CropConfig memory c = crops[cropIds[i]];
+            if (!c.enabled) revert CropDisabled();
+            if (plotIds[i] >= s.plotCount) revert PlotOutOfRange();
+            if (plots[msg.sender][plotIds[i]].cropId != 0) revert PlotNotEmpty();
+            totalCost += c.plantCost;
+        }
+
+        uint256 bal = seedBalance[msg.sender];
+        if (bal < totalCost) revert InsufficientSeed();
+        seedBalance[msg.sender] = bal - totalCost;
+
+        // Apply pass: write state.
+        uint64 ts = uint64(block.timestamp);
+        for (uint256 i = 0; i < len; ++i) {
+            Plot storage p = plots[msg.sender][plotIds[i]];
+            p.cropId = cropIds[i];
+            p.plantedAt = ts;
+            emit Planted(msg.sender, plotIds[i], cropIds[i], ts);
+        }
+        unchecked { s.totalPlanted += uint64(len); }
+    }
+
     /* ------------------------------------------------------------------ */
     /*                                Views                               */
     /* ------------------------------------------------------------------ */

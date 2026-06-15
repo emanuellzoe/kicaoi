@@ -1,6 +1,13 @@
 // KicaoiFarm address + the minimal ABI the UI needs.
 import { deploymentForChain } from "./deployments";
 
+// cUSD (Celo Dollar) addresses — used as feeCurrency so MiniPay users pay gas
+// in stablecoin instead of native CELO (Celo CIP-64).
+export const CUSD_ADDRESS: Partial<Record<number, `0x${string}`>> = {
+  42220: "0x765DE816845861e75A25fCA122bb6898B8B1282a", // Celo Mainnet
+  44787: "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1", // Celo Alfajores
+};
+
 const ZERO = "0x0000000000000000000000000000000000000000";
 
 // Resolution order: env override -> committed deployment registry -> zero.
@@ -105,5 +112,22 @@ export const KICAOI_ABI = [
         ],
       },
     ],
+  },
+  {
+    type: "function",
+    name: "batchHarvest",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "plotIds", type: "uint256[]" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "batchPlant",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "plotIds", type: "uint256[]" },
+      { name: "cropIds", type: "uint8[]" },
+    ],
+    outputs: [],
   },
 ] as const;
