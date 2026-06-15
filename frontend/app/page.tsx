@@ -248,6 +248,8 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
         )}
       </div>
 
+      <SeedCalculator />
+
       {achievements.length > 0 && <Achievements items={achievements} />}
 
       {busy && <p className="note center">Confirming transaction…</p>}
