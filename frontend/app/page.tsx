@@ -184,6 +184,12 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
           <div className="label">SEED</div>
           <div className="value">{seed.isLoading ? "—" : seedBal}</div>
         </div>
+        {seedInFlight > 0 && (
+          <div className="stat">
+            <div className="label">In Flight</div>
+            <div className="value" style={{ fontSize: "14px", color: "var(--muted)" }}>🌱 {seedInFlight}</div>
+          </div>
+        )}
       </div>
 
       <div className="card">
