@@ -335,6 +335,7 @@ function PlotCard({
       {empty ? (
         <>
           <div className="state">Plot #{plotId} · empty</div>
+          {recallCrop(plotId) > 0 && <div className="last-crop-hint">last: {cropById(recallCrop(plotId))?.emoji}</div>}
           <div className="crop-pick">
             {CROPS.map((c) => (
               <button
