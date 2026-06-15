@@ -113,7 +113,8 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
     query: { enabled: enabled && plotCount > 0 },
   });
 
-  const { writeContract, data: txHash, isPending, reset } = useWriteContract();
+  const { addToast } = useToast();
+  const { writeContract, data: txHash, isPending, reset, error: writeError } = useWriteContract();
   const receipt = useWaitForTransactionReceipt({ hash: txHash });
 
   useEffect(() => {
@@ -124,9 +125,15 @@ function Farm({ address, enabled, isMiniPay }: { address: `0x${string}`; enabled
       unlockCost.refetch();
       plots.refetch();
       reset();
+      addToast("success", "Transaction confirmed!");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [receipt.isSuccess]);
+
+  useEffect(() => {
+    if (writeError) addToast("error", "Transaction rejected.");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [writeError]);
 
   const busy = isPending || receipt.isLoading;
   const seedBal = seed.data ? Number(seed.data) : 0;
