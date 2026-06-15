@@ -386,3 +386,76 @@ a.nav-link {
   line-height: 1.5;
   margin-top: 4px;
 }
+
+/* How it plays — steps */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid #243018;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.step-num {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--green);
+  color: #06210f;
+  font-weight: 800;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.step-title {
+  font-weight: 700;
+  font-size: 14px;
+}
+.step-desc {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 3px;
+}
+
+/* Crops */
+.crop-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.crop-card {
+  background: var(--card);
+  border: 1px solid #243018;
+  border-radius: 14px;
+  padding: 14px 8px;
+  text-align: center;
+}
+.crop-emoji {
+  font-size: 30px;
+}
+.crop-name {
+  font-weight: 700;
+  font-size: 13px;
+  margin-top: 4px;
+}
+.crop-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.crop-yield {
+  color: var(--green);
+  font-weight: 700;
+}
