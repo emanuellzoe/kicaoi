@@ -519,3 +519,11 @@ a.nav-link {
   font-size: 12px;
   margin-top: 10px;
 }
+
+/* ── Seed Calculator ──────────────────────────────────────────── */
+.calc-toggle { background: none; border: none; color: var(--text); font-size: 13px; cursor: pointer; padding: 0; font-weight: 500; }
+.calc-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.calc-table th { text-align: left; padding: 6px 8px; color: var(--muted); font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.calc-table td { padding: 7px 8px; }
+.calc-table tr:not(:last-child) td { border-bottom: 1px solid rgba(255,255,255,0.05); }
+.best-row td { color: var(--green); }
