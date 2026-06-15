@@ -57,4 +57,4 @@ export const WALLETS_FILE = fileURLToPath(new URL("../wallets.json", import.meta
 export const PUBLIC_FILE  = fileURLToPath(new URL("../wallets.public.json", import.meta.url));
 
 
-// [bot-ver] 1.3.0
+// [bot-ver] 1.3.1
