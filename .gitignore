@@ -1,0 +1,13 @@
+# Node / frontend (added later)
+node_modules/
+.next/
+.env
+.env.local
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+
+# OS
+.DS_Store
