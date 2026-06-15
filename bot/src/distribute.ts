@@ -54,3 +54,6 @@ for (const w of wallets) {
 
 log(`Selesai. funded=${stat.funded} skipped=${stat.skipped} failed=${stat.failed}`);
 if (stat.failed > 0 && stat.funded === 0) process.exit(1);
+
+
+// [dist-v] 1
