@@ -340,7 +340,7 @@ function PlotCard({
               <button
                 key={c.id}
                 className={pick === c.id ? "active" : ""}
-                onClick={() => setPick(c.id)}
+                onClick={() => { setPick(c.id); rememberCrop(plotId, c.id); }}
               >
                 {c.emoji}
               </button>
@@ -349,7 +349,7 @@ function PlotCard({
           <button
             className="mt"
             disabled={busy || seedBal < (cropById(pick)?.cost ?? 0)}
-            onClick={() => onPlant(pick)}
+            onClick={() => { rememberCrop(plotId, pick); onPlant(pick); }}
           >
             Plant ({cropById(pick)?.cost} SEED)
           </button>
