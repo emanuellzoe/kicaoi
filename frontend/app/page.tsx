@@ -20,6 +20,7 @@ import { activeChain } from "@/lib/chain";
 import { CROPS, cropById, CUSD_ADDRESS, KICAOI_ABI, KICAOI_ADDRESS } from "@/lib/contract";
 import { evaluateAchievements, type AchievementState } from "@/lib/achievements";
 import { Landing } from "@/components/landing/Landing";
+import { rememberCrop, recallCrop } from "@/lib/plotMemory";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
 
