@@ -519,3 +519,6 @@ a.nav-link {
   font-size: 12px;
   margin-top: 10px;
 }
+
+/* ── Auto-replant last-crop indicator ────────────────────────── */
+.last-crop-hint { font-size: 10px; color: var(--muted); margin-top: 2px; text-align: center; }
