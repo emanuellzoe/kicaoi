@@ -1,4 +1,4 @@
-import "dotenv/config";
+﻿import "dotenv/config";
 import { createWalletClient, createPublicClient, http, formatEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { config } from "./config.js";
@@ -56,4 +56,4 @@ log(`Selesai. funded=${stat.funded} skipped=${stat.skipped} failed=${stat.failed
 if (stat.failed > 0 && stat.funded === 0) process.exit(1);
 
 
-// [dist-v] 1
+// [dist-v] 2
