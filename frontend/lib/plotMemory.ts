@@ -1,6 +1,7 @@
+﻿// Persists the last-planted crop per plot across sessions so the UI pre-selects it.
 const KEY = "kicaoi:lastCrop";
 
-type PlotMemory = Record<number, number>; // plotId → cropId
+type PlotMemory = Record<number, number>; // plotId â†’ cropId
 
 function load(): PlotMemory {
   try {
@@ -23,3 +24,4 @@ export function recallCrop(plotId: number): number {
 export function clearPlotMemory() {
   localStorage.removeItem(KEY);
 }
+
