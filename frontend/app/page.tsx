@@ -304,7 +304,7 @@ function PlotCard({
     return () => clearInterval(t);
   }, []);
 
-  const [pick, setPick] = useState(1);
+  const [pick, setPick] = useState(() => recallCrop(plotId));
   const crop = cropById(cropId);
   const empty = cropId === 0;
 
