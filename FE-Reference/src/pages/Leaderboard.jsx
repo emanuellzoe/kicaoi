@@ -199,8 +199,8 @@ export default function LeaderboardPage() {
                   </span>
                   <div className="text-right">
                     <div className="text-sm font-bold text-green-400">{e.totalSeedHarvested.toString()} SEED</div>
-                    <div className="text-[10px] text-white/30 font-body">
-                      {e.totalHarvested} harvests · {e.plotCount} plots
+                    <div className="text-[11px] text-white/40 font-body">
+                      {e.totalHarvested} harvests · {e.plotCount} plot{e.plotCount !== 1 ? 's' : ''}
                     </div>
                   </div>
                 </div>
