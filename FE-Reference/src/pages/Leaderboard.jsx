@@ -108,7 +108,10 @@ export default function LeaderboardPage() {
         {/* Controls */}
         <div className="liquid-glass rounded-2xl p-4 mb-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-white/40 font-body">Ranked by lifetime SEED harvested</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-white/40 font-body">Ranked by lifetime SEED harvested</span>
+              {entries.length > 0 && <span className="text-xs text-white/30 font-body">({entries.length} farmers)</span>}
+            </div>
             <button
               onClick={load}
               disabled={loading}
