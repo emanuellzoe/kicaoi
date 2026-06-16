@@ -4,6 +4,14 @@ export type CropEfficiency = {
   roi: number;
 };
 
+export function totalSeedInFlight(
+  plotsData: Array<{ cropId: number }> | undefined,
+  getCropCost: (id: number) => number
+): number {
+  if (!plotsData) return 0;
+  return plotsData.reduce((sum, p) => sum + (p.cropId > 0 ? getCropCost(p.cropId) : 0), 0);
+}
+
 export function cropEfficiency(cost: number, yieldAmt: number, growMins: number): CropEfficiency {
   const profit = yieldAmt - cost;
   const seedPerMin = growMins > 0 ? profit / growMins : 0;
