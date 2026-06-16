@@ -185,7 +185,7 @@ export default function LeaderboardPage() {
               return (
                 <div
                   key={e.address}
-                  className={`flex items-center gap-3 px-4 py-3.5 border-b border-white/5 last:border-b-0 ${isMe ? 'bg-green-900/20' : ''}`}
+                  className={`flex items-center gap-3 px-4 py-3.5 border-b border-white/5 last:border-b-0 ${isMe ? 'bg-green-900/20' : ''} ${i < 3 ? 'bg-gradient-to-r from-white/5 to-transparent' : ''}`}
                 >
                   <span className="text-base font-bold min-w-[32px] text-center text-white/60">
                     {i < 3 ? MEDAL[i] : `#${i + 1}`}
