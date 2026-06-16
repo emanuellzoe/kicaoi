@@ -37,3 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
+
+// [layout-v] 1
