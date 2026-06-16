@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { parseAbiItem } from 'viem';
 import { useAccount } from 'wagmi';
@@ -23,6 +23,8 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updatedAt, setUpdatedAt] = useState(null);
+  const [countdown, setCountdown] = useState(60);
+  const countdownRef = useRef(null);
 
   const load = async () => {
     setLoading(true);
@@ -81,6 +83,16 @@ export default function LeaderboardPage() {
 
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    countdownRef.current = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) { load(); return 60; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(countdownRef.current);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Ambient glow */}
@@ -117,7 +129,7 @@ export default function LeaderboardPage() {
               disabled={loading}
               className="liquid-glass rounded-full px-3 py-1.5 text-xs text-white/70 hover:text-white transition-colors border-none cursor-pointer disabled:opacity-40"
             >
-              {loading ? 'Loading…' : '↻ Refresh'}
+              {loading ? 'Loading…' : `↻ Refresh (${countdown}s)`}
             </button>
           </div>
           {updatedAt && (
