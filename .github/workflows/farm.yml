@@ -1,4 +1,4 @@
-name: KICAOI Farm Bot
+﻿name: KICAOI Farm Bot
 
 on:
   schedule:
@@ -37,4 +37,4 @@ jobs:
         run: cd bot && npx tsx src/farm.ts
 
 
-# [wf-v] 1
+# [wf-v] 2
