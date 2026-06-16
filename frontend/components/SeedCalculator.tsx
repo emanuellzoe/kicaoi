@@ -11,42 +11,52 @@ export function SeedCalculator() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="card">
+    <div className="liquid-glass rounded-2xl p-4">
       <button
-        className="calc-toggle"
+        className="w-full text-left text-xs text-white/40 font-body bg-transparent border-none cursor-pointer flex items-center justify-between"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
       >
-        📊 Crop Stats {open ? "▲" : "▼"}
+        <span>📊 Crop Stats</span>
+        <span className="text-white/30">{open ? "▲" : "▼"}</span>
       </button>
 
       {open && (
-        <table className="calc-table mt">
-          <thead>
-            <tr>
-              <th>Crop</th>
-              <th>Cost</th>
-              <th>Yield</th>
-              <th>Time</th>
-              <th>Profit</th>
-              <th>SEED/min</th>
-              <th>ROI</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.id} className={r.roi === bestRoi ? "best-row" : ""}>
-                <td>{r.emoji} {r.name}</td>
-                <td>{r.cost}</td>
-                <td>{r.yield}</td>
-                <td>{r.growMins}m</td>
-                <td>+{r.profit}</td>
-                <td>{r.seedPerMin.toFixed(2)}</td>
-                <td>{r.roi}% {r.roi === bestRoi ? "⭐" : ""}</td>
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full text-xs font-body border-collapse">
+            <thead>
+              <tr className="text-white/40 text-left">
+                <th className="py-1.5 pr-2 font-medium">Crop</th>
+                <th className="py-1.5 px-2 font-medium">Cost</th>
+                <th className="py-1.5 px-2 font-medium">Yield</th>
+                <th className="py-1.5 px-2 font-medium">Time</th>
+                <th className="py-1.5 px-2 font-medium">Profit</th>
+                <th className="py-1.5 px-2 font-medium">SEED/min</th>
+                <th className="py-1.5 pl-2 font-medium">ROI</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr
+                  key={r.id}
+                  className={`border-t border-white/5 ${r.roi === bestRoi ? "text-green-400" : "text-white/70"}`}
+                >
+                  <td className="py-1.5 pr-2 whitespace-nowrap">
+                    {r.emoji} {r.name}
+                  </td>
+                  <td className="py-1.5 px-2">{r.cost}</td>
+                  <td className="py-1.5 px-2">{r.yield}</td>
+                  <td className="py-1.5 px-2">{r.growMins}m</td>
+                  <td className="py-1.5 px-2">+{r.profit}</td>
+                  <td className="py-1.5 px-2">{r.seedPerMin.toFixed(2)}</td>
+                  <td className="py-1.5 pl-2 whitespace-nowrap">
+                    {r.roi}% {r.roi === bestRoi ? "⭐" : ""}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
