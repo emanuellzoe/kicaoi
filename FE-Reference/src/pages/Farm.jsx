@@ -271,6 +271,7 @@ function Farm({ address, enabled, isMiniPay }) {
               <button
                 disabled={busy}
                 onClick={() => send('batchHarvest', [readyPlotIds])}
+                aria-label={`Harvest all ${readyPlotIds.length} ready plots`}
                 className="liquid-glass-strong rounded-full px-3 py-1.5 text-xs font-semibold text-white border-none cursor-pointer hover:scale-105 transition-transform disabled:opacity-40"
               >
                 Harvest All ({readyPlotIds.length})
