@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
@@ -93,4 +93,4 @@ export default function Navbar() {
 }
 
 
-// [nav-v] 1
+// [nav-v] 2
