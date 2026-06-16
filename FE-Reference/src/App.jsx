@@ -8,6 +8,14 @@ import Home from './pages/Home';
 import FarmPage from './pages/Farm';
 import LeaderboardPage from './pages/Leaderboard';
 import NotFound from './components/NotFound';
+import { useScrollToTop } from './hooks/useScrollToTop';
+import { usePageTitle } from './hooks/usePageTitle';
+
+function ScrollAndTitle() {
+  useScrollToTop();
+  usePageTitle();
+  return null;
+}
 
 const queryClient = new QueryClient();
 
@@ -17,6 +25,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <div className="bg-black min-h-screen w-full relative selection:bg-white/30 selection:text-white">
+            <ScrollAndTitle />
             <Navbar />
             <Routes>
               <Route path="/" element={<Home />} />
