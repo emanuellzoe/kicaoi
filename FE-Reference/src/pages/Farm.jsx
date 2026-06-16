@@ -136,6 +136,7 @@ function LandingConnect({ isMiniPay, onConnect }) {
             Connect Wallet to Farm
           </button>
         )}
+        {isMiniPay && <p className="text-center text-xs text-green-400/70 font-body mt-2">✓ Gas fees paid in cUSD via MiniPay</p>}
         <p className="text-center text-xs text-white/30 font-body mt-3">
           Works with MetaMask, MiniPay & any injected wallet
         </p>
