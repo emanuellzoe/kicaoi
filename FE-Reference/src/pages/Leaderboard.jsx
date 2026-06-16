@@ -148,7 +148,10 @@ export default function LeaderboardPage() {
             </div>
           ) : (
             <div className="liquid-glass rounded-2xl p-3 mb-3">
-              <span className="text-xs text-white/40 font-body">You haven't farmed yet — start to appear on the board</span>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🌱</span>
+                <span className="text-xs text-white/40 font-body">You haven't farmed yet — start to appear on the board</span>
+              </div>
             </div>
           );
         })()}
