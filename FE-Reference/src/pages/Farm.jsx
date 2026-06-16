@@ -395,6 +395,7 @@ function PlotCard({ plotId, cropId, plantedAt, seedBal, busy, onPlant, onHarvest
           >
             Plant ({cropById(pick)?.cost} SEED)
           </button>
+          {seedBal < (cropById(pick)?.cost ?? 0) && <div className="text-[10px] text-red-400/70 font-body mt-1">Not enough SEED</div>}
         </>
       ) : (
         <>
