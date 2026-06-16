@@ -48,7 +48,7 @@ export default function FarmPage() {
         <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-xl font-heading italic text-white">🌱 Kicaoi</h1>
-            <p className="text-xs text-white/40 font-body">Plant · Wait · Harvest — on Celo</p>
+            <p className="text-xs text-white/40 font-body">Plant · Wait · Harvest — on Celo<span className="text-[10px] text-white/20 ml-2">{activeChain.name}</span></p>
           </div>
           <div className="flex items-center gap-2">
             <Link to="/leaderboard" className="liquid-glass rounded-full px-3 py-1.5 text-xs font-medium text-white/80 hover:text-white transition-colors no-underline">
