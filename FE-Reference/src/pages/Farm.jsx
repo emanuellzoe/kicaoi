@@ -280,6 +280,7 @@ function Farm({ address, enabled, isMiniPay }) {
             <button
               disabled={busy || seedBal < Number(unlockCost.data ?? 0n) || plotCount === 0}
               onClick={() => send('unlockPlot', [])}
+              aria-label="Unlock a new plot"
               className="bg-white/5 border border-white/10 rounded-full px-3 py-1.5 text-xs font-semibold text-white/70 border-none cursor-pointer hover:text-white transition-colors disabled:opacity-40"
             >
               + Plot ({unlockCost.data ? Number(unlockCost.data) : '…'} SEED)
