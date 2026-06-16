@@ -259,7 +259,7 @@ function Farm({ address, enabled, isMiniPay }) {
             Buy
           </button>
         </div>
-        {amount && <div className="text-xs text-white/30 font-body mt-2">≈ {Math.floor(Number(amount) * 100)} SEED</div>}
+        {amount && <div className="text-xs text-white/30 font-body mt-2">≈ {Math.floor(Number(amount) * 100)} SEED &nbsp;·&nbsp; rate: 100 SEED/CELO</div>}
       </div>
 
       {/* Plots */}
