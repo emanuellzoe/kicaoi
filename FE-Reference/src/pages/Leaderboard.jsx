@@ -175,11 +175,12 @@ export default function LeaderboardPage() {
                   <span className="text-base font-bold min-w-[32px] text-center text-white/60">
                     {i < 3 ? MEDAL[i] : `#${i + 1}`}
                   </span>
-                  <span className="flex-1 font-mono text-sm text-white/80">
+                  <span className="flex-1 font-mono text-sm text-white/80 flex items-center gap-1">
                     {shorten(e.address)}
                     {isMe && (
                       <span className="ml-2 text-[10px] bg-green-500 text-black rounded px-1.5 py-0.5 font-bold font-body">you</span>
                     )}
+                    <button onClick={() => navigator.clipboard.writeText(e.address)} className="text-white/20 hover:text-white/60 transition-colors bg-transparent border-none cursor-pointer text-xs p-0 ml-1" title="Copy address">⎘</button>
                   </span>
                   <div className="text-right">
                     <div className="text-sm font-bold text-green-400">{e.totalSeedHarvested.toString()} SEED</div>
