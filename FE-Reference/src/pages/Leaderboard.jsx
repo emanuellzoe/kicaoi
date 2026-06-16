@@ -127,6 +127,20 @@ export default function LeaderboardPage() {
           )}
         </div>
 
+        {me && entries.length > 0 && (() => {
+          const rank = entries.findIndex(e => e.address.toLowerCase() === me.toLowerCase());
+          return rank >= 0 ? (
+            <div className="liquid-glass rounded-2xl p-3 mb-3 flex items-center justify-between">
+              <span className="text-xs text-white/50 font-body">Your rank</span>
+              <span className="text-sm font-bold text-green-400">#{rank + 1} of {entries.length}</span>
+            </div>
+          ) : (
+            <div className="liquid-glass rounded-2xl p-3 mb-3">
+              <span className="text-xs text-white/40 font-body">You haven't farmed yet — start to appear on the board</span>
+            </div>
+          );
+        })()}
+
         {error && (
           <div className="bg-red-900/30 border border-red-700/50 rounded-2xl px-4 py-3 text-red-300 text-xs mb-3">
             {error}
