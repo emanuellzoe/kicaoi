@@ -37,4 +37,4 @@ jobs:
         run: cd bot && npx tsx src/farm.ts
 
 
-# [wf-v] 3
+# [wf-v] 4
