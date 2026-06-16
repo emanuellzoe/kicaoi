@@ -7,6 +7,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import FarmPage from './pages/Farm';
 import LeaderboardPage from './pages/Leaderboard';
+import NotFound from './components/NotFound';
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/farm" element={<FarmPage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
         </BrowserRouter>
