@@ -204,4 +204,4 @@ export default function LeaderboardPage() {
 }
 
 
-// [lb-page-v] 7
+// [lb-page-v] 8
