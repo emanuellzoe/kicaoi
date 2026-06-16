@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { activeChain } from '../lib/chain';
+import { NetworkBadge } from './NetworkBadge';
 
 const NAV_LINKS = [
   { label: 'How It Works', href: '/#how-it-works', external: false, anchor: true },
@@ -72,6 +73,11 @@ export default function Navbar() {
             Connect
           </button>
         )}
+      </div>
+
+      {/* Right side: network badge (desktop) */}
+      <div className="pointer-events-auto hidden md:flex items-center gap-2">
+        {isConnected && <NetworkBadge />}
       </div>
 
       {/* Mobile: farm shortcut */}
