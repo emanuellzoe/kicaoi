@@ -175,6 +175,11 @@ function Farm({ address, enabled, isMiniPay }) {
     }
   }, [receipt.isSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    const t = setInterval(() => plots.refetch(), 30000);
+    return () => clearInterval(t);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const busy = isPending || receipt.isLoading;
   const seedBal = seed.data ? Number(seed.data) : 0;
 
