@@ -2,22 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { parseAbiItem } from "viem";
 import { useAccount } from "wagmi";
-import { publicClient } from "@/lib/publicClient";
-import { KICAOI_ADDRESS, KICAOI_ABI } from "@/lib/contract";
-import { DEPLOYMENTS } from "@/lib/deployments";
-import { activeChain } from "@/lib/chain";
-
-const SEEDS_BOUGHT_EVENT = parseAbiItem(
-  "event SeedsBought(address indexed user, uint256 celoAmount, uint256 seedCredited)"
-);
 
 const MEDAL = ["🥇", "🥈", "🥉"];
 
 type Entry = {
+  rank: number;
   address: `0x${string}`;
-  totalSeedHarvested: bigint;
+  totalSeedHarvested: string;
   totalHarvested: number;
   plotCount: number;
 };
@@ -39,50 +31,14 @@ export default function LeaderboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const deployment = DEPLOYMENTS[activeChain.id];
-      const fromBlock = deployment?.startBlock ? BigInt(deployment.startBlock) : 0n;
+      // The /api/leaderboard route does the chunked on-chain scan server-side
+      // (forno caps eth_getLogs to ~1k blocks), so the client just consumes it.
+      const res = await fetch("/api/leaderboard");
+      if (!res.ok) throw new Error(`leaderboard request failed: ${res.status}`);
+      const data: { entries?: Entry[]; error?: string } = await res.json();
+      if (data.error) throw new Error(data.error);
 
-      const logs = await publicClient.getLogs({
-        address: KICAOI_ADDRESS,
-        event: SEEDS_BOUGHT_EVENT,
-        fromBlock,
-        toBlock: "latest",
-      });
-
-      const unique = [...new Set(logs.map((l) => l.args.user))].filter(
-        (u): u is `0x${string}` => Boolean(u)
-      );
-
-      if (unique.length === 0) {
-        setEntries([]);
-        setUpdatedAt(new Date());
-        return;
-      }
-
-      const results = await publicClient.multicall({
-        contracts: unique.map((addr) => ({
-          address: KICAOI_ADDRESS,
-          abi: KICAOI_ABI,
-          functionName: "getStats" as const,
-          args: [addr] as const,
-        })),
-      });
-
-      const parsed: Entry[] = [];
-      results.forEach((r, i) => {
-        if (r.status === "success" && r.result) {
-          const s = r.result;
-          parsed.push({
-            address: unique[i],
-            totalSeedHarvested: s.totalSeedHarvested,
-            totalHarvested: Number(s.totalHarvested),
-            plotCount: Number(s.plotCount),
-          });
-        }
-      });
-
-      parsed.sort((a, b) => (b.totalSeedHarvested > a.totalSeedHarvested ? 1 : -1));
-      setEntries(parsed.slice(0, 50));
+      setEntries(data.entries ?? []);
       setUpdatedAt(new Date());
     } catch (e) {
       console.error(e);
@@ -206,7 +162,7 @@ export default function LeaderboardPage() {
           </div>
         ) : (
           <div className="liquid-glass rounded-2xl overflow-hidden">
-            {entries.map((e, i) => {
+            {entries.slice(0, 50).map((e, i) => {
               const isMe = me && e.address.toLowerCase() === me.toLowerCase();
               return (
                 <div
