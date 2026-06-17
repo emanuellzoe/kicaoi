@@ -1,3 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============ Reference (liquid-glass) theme tokens ============ */
+/* Consumed via Tailwind classes (bg-card, text-muted-foreground, …). The two
+   names that collide with the farm theme below (--card, --muted) are renamed
+   to --c-card / --c-muted and remapped in tailwind.config.ts. */
+:root {
+  --background: 213 45% 67%;
+  --foreground: 0 0% 100%;
+  --c-card: 213 45% 62%;
+  --card-foreground: 0 0% 100%;
+  --primary: 0 0% 100%;
+  --primary-foreground: 213 45% 67%;
+  --secondary: 213 45% 72%;
+  --secondary-foreground: 0 0% 100%;
+  --c-muted: 213 35% 60%;
+  --muted-foreground: 0 0% 100% / 0.7;
+  --accent: 213 45% 72%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84.2% 60.2%;
+  --border: 0 0% 100% / 0.2;
+  --input: 0 0% 100% / 0.2;
+  --ring: 0 0% 100% / 0.3;
+  --radius: 9999px;
+}
+
+/* LIQUID GLASS UTILITIES */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0.15) 80%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.liquid-glass-strong {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
+  border: none;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+.liquid-glass-strong::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0.2) 80%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ===================== Existing farm theme ===================== */
 :root {
   --bg: #0e140c;
   --surface: #161e12;
@@ -544,3 +637,11 @@ a.nav-link {
 }
 
 .timer-hint { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* ── Seed Calculator ──────────────────────────────────────────── */
+.calc-toggle { background: none; border: none; color: var(--text); font-size: 13px; cursor: pointer; padding: 0; font-weight: 500; }
+.calc-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.calc-table th { text-align: left; padding: 6px 8px; color: var(--muted); font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.calc-table td { padding: 7px 8px; }
+.calc-table tr:not(:last-child) td { border-bottom: 1px solid rgba(255,255,255,0.05); }
+.best-row td { color: var(--green); }

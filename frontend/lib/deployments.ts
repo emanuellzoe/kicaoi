@@ -20,7 +20,7 @@ export const DEPLOYMENTS: Record<number, Deployment> = {
     chainId: 42220,
     address: "0xb8Fb82C02acCbb0cbE613e3633781a67438563d9",
     explorer: "https://celoscan.io",
-    startBlock: 38700000n, // approx deployment block — verify at celoscan.io
+    startBlock: 69521009n, // contract deploy block (broadcast run-latest)
   },
 };
 
