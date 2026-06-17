@@ -22,6 +22,8 @@ import { evaluateAchievements, type AchievementState } from "@/lib/achievements"
 import { getStreak, recordHarvest } from "@/lib/streak";
 import { getPrestige, type PrestigeLevel } from "@/lib/prestige";
 import { SeedCalculator } from "@/components/SeedCalculator";
+import { GrowthBar } from "@/components/GrowthBar";
+import { formatCountdown, formatHarvestTime } from "@/lib/time";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
 
@@ -455,7 +457,13 @@ function PlotCard({
     return Math.max(0, plantedAt + crop.growMins * 60 - now);
   }, [empty, crop, now, plantedAt]);
 
-  const mmss = `${String(Math.floor(remaining / 60)).padStart(2, "0")}:${String(remaining % 60).padStart(2, "0")}`;
+  const growProgress = useMemo(() => {
+    if (empty || !crop || plantedAt === 0) return 0;
+    const total = crop.growMins * 60;
+    return Math.min(1, (now - plantedAt) / total);
+  }, [empty, crop, now, plantedAt]);
+
+  const soon = !ready && !empty && growProgress >= 0.8;
 
   return (
     <div
@@ -491,15 +499,21 @@ function PlotCard({
         </>
       ) : (
         <>
-          <div className="text-[10px] text-white/40 font-body mb-2">
-            {crop?.name} · {ready ? "✅ ready!" : mmss}
+          <div className="text-[10px] text-white/40 font-body mb-1">
+            {crop?.name} · {ready ? "✅ ready!" : soon ? `⚡ ${formatCountdown(remaining)}` : formatCountdown(remaining)}
+          </div>
+          {!ready && plantedAt > 0 && (
+            <div className="text-[9px] text-white/30 font-body mb-1">ready at {formatHarvestTime(plantedAt, crop?.growMins ?? 0)}</div>
+          )}
+          <div className="mb-2">
+            <GrowthBar progress={ready ? 1 : growProgress} />
           </div>
           <button
             disabled={busy || !ready}
             onClick={onHarvest}
             className={`w-full rounded-full py-2 text-xs font-semibold border-none cursor-pointer disabled:opacity-40 transition-all ${ready ? "bg-green-500 text-black hover:scale-105" : "bg-white/5 text-white/50"}`}
           >
-            {ready ? `Harvest (+${crop?.yield})` : "Growing…"}
+            {ready ? `Harvest (+${crop?.yield} SEED)` : "Growing…"}
           </button>
         </>
       )}
