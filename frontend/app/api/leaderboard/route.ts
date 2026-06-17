@@ -39,11 +39,18 @@ async function getAllUsers(): Promise<`0x${string}`[]> {
   for (let i = 0; i < ranges.length; i += LOG_CONCURRENCY) {
     const slice = ranges.slice(i, i + LOG_CONCURRENCY);
     const batches = await Promise.all(
-      slice.map(({ from, to }) =>
-        client
-          .getLogs({ address: CONTRACT, event: SEEDS_BOUGHT, fromBlock: from, toBlock: to })
-          .catch(() => [] as Awaited<ReturnType<typeof client.getLogs>>) // skip failed chunk
-      )
+      slice.map(async ({ from, to }) => {
+        try {
+          return await client.getLogs({
+            address: CONTRACT,
+            event: SEEDS_BOUGHT,
+            fromBlock: from,
+            toBlock: to,
+          });
+        } catch {
+          return []; // skip failed chunk — don't abort entire scan
+        }
+      })
     );
     for (const logs of batches) {
       for (const l of logs) {
