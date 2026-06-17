@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   useAccount,
@@ -19,6 +19,8 @@ import { useMiniPay } from "@/hooks/useMiniPay";
 import { activeChain } from "@/lib/chain";
 import { CROPS, cropById, CUSD_ADDRESS, KICAOI_ABI, KICAOI_ADDRESS } from "@/lib/contract";
 import { evaluateAchievements, type AchievementState } from "@/lib/achievements";
+import { getStreak, recordHarvest } from "@/lib/streak";
+import { getPrestige, type PrestigeLevel } from "@/lib/prestige";
 import { SeedCalculator } from "@/components/SeedCalculator";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
@@ -192,6 +194,9 @@ function Farm({
 
   useEffect(() => {
     if (receipt.isSuccess) {
+      if (lastFnRef.current === "harvest" || lastFnRef.current === "batchHarvest") {
+        setStreak(recordHarvest(address));
+      }
       celo.refetch();
       seed.refetch();
       stats.refetch();
@@ -228,8 +233,17 @@ function Farm({
   // tx field not in wagmi's base type, hence the loose cast on writeContract.
   const feeCurrency = isMiniPay ? CUSD_ADDRESS[activeChain.id] : undefined;
 
-  const send = (functionName: string, args: unknown[], value?: bigint) =>
+  const lastFnRef = useRef<string>("");
+  const [streak, setStreak] = useState(() => getStreak(address));
+  const prestige = useMemo<PrestigeLevel | null>(
+    () => (stats.data ? getPrestige(Number(stats.data.totalSeedHarvested)) : null),
+    [stats.data]
+  );
+
+  const send = (functionName: string, args: unknown[], value?: bigint) => {
+    lastFnRef.current = functionName;
     (writeContract as any)({ ...base, functionName, args, value, ...(feeCurrency ? { feeCurrency } : {}) });
+  };
 
   const [amount, setAmount] = useState("0.1");
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
@@ -253,17 +267,43 @@ function Farm({
   return (
     <div className="flex flex-col gap-3">
       {/* Balances */}
-      <div className="liquid-glass rounded-2xl p-4 grid grid-cols-2 gap-4">
-        <div>
-          <div className="text-xs text-white/40 font-body mb-1">CELO</div>
-          <div className="text-2xl font-bold font-heading">
-            {celo.data ? Number(formatEther(celo.data.value)).toFixed(3) : "—"}
+      <div className="liquid-glass rounded-2xl p-4">
+        <div className="grid grid-cols-2 gap-4 mb-3">
+          <div>
+            <div className="text-xs text-white/40 font-body mb-1">CELO</div>
+            <div className="text-2xl font-bold font-heading">
+              {celo.data ? Number(formatEther(celo.data.value)).toFixed(3) : "—"}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-white/40 font-body mb-1">SEED</div>
+            <div className="text-2xl font-bold font-heading text-green-400">{seed.isLoading ? "—" : seedBal}</div>
           </div>
         </div>
-        <div>
-          <div className="text-xs text-white/40 font-body mb-1">SEED</div>
-          <div className="text-2xl font-bold font-heading text-green-400">{seed.isLoading ? "—" : seedBal}</div>
-        </div>
+        {(prestige || streak > 0) && (
+          <div className="flex items-center gap-4 pt-3 border-t border-white/5">
+            {prestige && (
+              <div className="flex items-center gap-1.5 flex-1">
+                <span className="text-base">{prestige.emoji}</span>
+                <div>
+                  <div className="text-[10px] text-white/30 font-body">Prestige</div>
+                  <div className={`text-xs font-semibold ${prestige.color}`}>{prestige.title}</div>
+                </div>
+              </div>
+            )}
+            {streak > 0 && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-base">🔥</span>
+                <div>
+                  <div className="text-[10px] text-white/30 font-body">Streak</div>
+                  <div className="text-xs font-semibold text-orange-400">
+                    {streak} day{streak !== 1 ? "s" : ""}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Buy Seeds */}
