@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { CROPS } from "@/lib/contract";
@@ -63,4 +63,4 @@ export function SeedCalculator() {
 }
 
 
-// [calc-v] 1
+// [calc-v] 2
