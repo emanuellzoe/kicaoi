@@ -11,3 +11,7 @@ contracts/broadcast/
 
 # OS
 .DS_Store
+
+# Bot — removed from repo, keep out of future commits
+bot/
+scripts/
