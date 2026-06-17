@@ -1,0 +1,37 @@
+name: KICAOI Farm Bot
+
+on:
+  schedule:
+    - cron: '*/6 * * * *'   # Setiap 6 menit (wheat grow = 5 menit)
+  workflow_dispatch:          # Bisa trigger manual dari GitHub UI
+
+jobs:
+  farm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5        # Kill jika lebih dari 5 menit (sebelum run berikutnya)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: bot/package-lock.json
+
+      - name: Install dependencies
+        run: cd bot && npm ci --prefer-offline 2>/dev/null || npm install
+
+      - name: Run Farm
+        env:
+          CHAIN: celo
+          RPC_URL: ${{ secrets.RPC_URL }}
+          KICAOI_WALLETS: ${{ secrets.KICAOI_WALLETS }}
+          NUM_WALLETS: "52"
+          CROP_ID: "1"
+          BUY_SEED_CELO: "0.15"
+          CONCURRENCY: "10"
+          MIN_GAS_RESERVE: "0.005"
+        run: cd bot && npx tsx src/farm.ts

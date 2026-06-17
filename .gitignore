@@ -12,6 +12,15 @@ contracts/broadcast/
 # OS
 .DS_Store
 
-# Bot — removed from repo, keep out of future commits
-bot/
+# Bot — wallet & secrets tetap out, source code boleh masuk
+bot/.env
+bot/wallets.json
+bot/wallets.public.json
+bot/farm-activity.log
+bot/farm-loop.log
+bot/farm-loop-err.log
+bot/auto-consolidate.log
+bot/auto-consolidate-err.log
+bot/node_modules/
 scripts/
+.vercel
