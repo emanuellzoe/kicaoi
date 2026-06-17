@@ -10,7 +10,8 @@ const CHAIN_ID = 42220;
 const deployment = DEPLOYMENTS[CHAIN_ID];
 const CONTRACT = deployment.address;
 const START_BLOCK = deployment.startBlock ?? 0n;
-const CHUNK = 50_000n;
+const CHUNK = 1_000n;       // blocks per getLogs call (forno caps the range ~1k)
+const LOG_CONCURRENCY = 15; // getLogs chunks fetched in parallel
 
 const client = createPublicClient({
   chain: celo,
@@ -42,23 +43,38 @@ type ActivityItem = {
 async function getLogsChunked(event: (typeof EVENTS)[keyof typeof EVENTS], user: Address) {
   const latest = await client.getBlockNumber();
   const results: ActivityItem[] = [];
+  const type = Object.keys(EVENTS).find(
+    (k) => EVENTS[k as keyof typeof EVENTS] === event
+  ) as ActivityItem["type"];
 
+  // Build [from, to] ranges, then fetch them in parallel batches — forno caps
+  // eth_getLogs to ~1k blocks, so a single full-range query would 400.
+  const ranges: { from: bigint; to: bigint }[] = [];
   for (let from = START_BLOCK; from <= latest; from += CHUNK) {
     const to = from + CHUNK - 1n < latest ? from + CHUNK - 1n : latest;
-    try {
-      const logs = await client.getLogs({
-        address: CONTRACT,
-        event,
-        args: { user } as Record<string, unknown>,
-        fromBlock: from,
-        toBlock: to,
-      });
+    ranges.push({ from, to });
+  }
 
+  for (let i = 0; i < ranges.length; i += LOG_CONCURRENCY) {
+    const slice = ranges.slice(i, i + LOG_CONCURRENCY);
+    const batches = await Promise.all(
+      slice.map(async ({ from, to }) => {
+        try {
+          return await client.getLogs({
+            address: CONTRACT,
+            event,
+            args: { user } as Record<string, unknown>,
+            fromBlock: from,
+            toBlock: to,
+          });
+        } catch {
+          return []; // skip failed chunk
+        }
+      })
+    );
+
+    for (const logs of batches) {
       for (const l of logs) {
-        const type = Object.keys(EVENTS).find(
-          (k) => EVENTS[k as keyof typeof EVENTS] === event
-        ) as ActivityItem["type"];
-
         const data: Record<string, string> = {};
         if (l.args) {
           for (const [k, v] of Object.entries(l.args)) {
@@ -73,8 +89,6 @@ async function getLogsChunked(event: (typeof EVENTS)[keyof typeof EVENTS], user:
           data,
         });
       }
-    } catch {
-      // skip failed chunk
     }
   }
 
