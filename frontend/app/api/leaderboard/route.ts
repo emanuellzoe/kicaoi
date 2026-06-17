@@ -12,7 +12,8 @@ const CHAIN_ID = 42220;
 const deployment = DEPLOYMENTS[CHAIN_ID];
 const CONTRACT = deployment.address;
 const START_BLOCK = deployment.startBlock ?? 0n;
-const CHUNK = 50_000n;      // blocks per getLogs call
+const CHUNK = 1_000n;       // blocks per getLogs call (forno caps the range ~1k)
+const LOG_CONCURRENCY = 20; // getLogs chunks fetched in parallel
 const BATCH = 100;          // addresses per multicall
 
 const client = createPublicClient({
@@ -28,20 +29,26 @@ async function getAllUsers(): Promise<`0x${string}`[]> {
   const latest = await client.getBlockNumber();
   const seen = new Set<string>();
 
+  // Build the list of [from, to] ranges, then fetch them in parallel batches.
+  const ranges: { from: bigint; to: bigint }[] = [];
   for (let from = START_BLOCK; from <= latest; from += CHUNK) {
     const to = from + CHUNK - 1n < latest ? from + CHUNK - 1n : latest;
-    try {
-      const logs = await client.getLogs({
-        address: CONTRACT,
-        event: SEEDS_BOUGHT,
-        fromBlock: from,
-        toBlock: to,
-      });
+    ranges.push({ from, to });
+  }
+
+  for (let i = 0; i < ranges.length; i += LOG_CONCURRENCY) {
+    const slice = ranges.slice(i, i + LOG_CONCURRENCY);
+    const batches = await Promise.all(
+      slice.map(({ from, to }) =>
+        client
+          .getLogs({ address: CONTRACT, event: SEEDS_BOUGHT, fromBlock: from, toBlock: to })
+          .catch(() => [] as Awaited<ReturnType<typeof client.getLogs>>) // skip failed chunk
+      )
+    );
+    for (const logs of batches) {
       for (const l of logs) {
         if (l.args.user) seen.add(l.args.user.toLowerCase());
       }
-    } catch {
-      // skip failed chunk — don't abort entire scan
     }
   }
 
