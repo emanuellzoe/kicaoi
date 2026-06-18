@@ -16,6 +16,12 @@ import type { Wallet } from "./chain.js";
 const GROW_TIMES: Record<number, number> = { 1: 300, 2: 1800, 3: 7200 };
 const SEED_COSTS: Record<number, number> = { 1: 5,   2: 20,   3: 60   };
 
+const GAS_BUY_SEEDS_INIT = 120_000n;
+const GAS_BUY_SEEDS      =  60_000n;
+const GAS_HARVEST        =  80_000n;
+const GAS_UNLOCK_PLOT    = 100_000n;
+const GAS_PLANT          =  80_000n;
+
 const wallets  = loadWallets().slice(0, config.numWallets);
 const cropId   = config.cropId;
 const growTime = GROW_TIMES[cropId] ?? 300;
@@ -48,7 +54,7 @@ async function farmWallet(w: Wallet): Promise<void> {
       const hash = await client.writeContract({
         ...contract, functionName: "buySeeds",
         value: config.buySeedCelo, account,
-        gas: 120000n, ...gp,
+        gas: GAS_BUY_SEEDS_INIT, ...gp,
       });
       await publicClient.waitForTransactionReceipt({ hash });
       stat.bought++;
@@ -87,7 +93,7 @@ async function farmWallet(w: Wallet): Promise<void> {
       const hash = await client.writeContract({
         ...contract, functionName: "harvest",
         args: [BigInt(i)], account,
-        gas: 80000n, ...gp,
+        gas: GAS_HARVEST, ...gp,
       });
       await publicClient.waitForTransactionReceipt({ hash });
       stat.harvested++;
@@ -108,7 +114,7 @@ async function farmWallet(w: Wallet): Promise<void> {
     try {
       const hash = await client.writeContract({
         ...contract, functionName: "unlockPlot", account,
-        gas: 100000n, ...gp,
+        gas: GAS_UNLOCK_PLOT, ...gp,
       });
       await publicClient.waitForTransactionReceipt({ hash });
       plotCount++;
@@ -144,7 +150,7 @@ async function farmWallet(w: Wallet): Promise<void> {
         const hash = await client.writeContract({
           ...contract, functionName: "buySeeds",
           value: config.buySeedCelo, account,
-          gas: 60000n, ...gp,
+          gas: GAS_BUY_SEEDS, ...gp,
         });
         await publicClient.waitForTransactionReceipt({ hash });
         stat.bought++;
@@ -171,7 +177,7 @@ async function farmWallet(w: Wallet): Promise<void> {
       const hash = await client.writeContract({
         ...contract, functionName: "plant",
         args: [BigInt(idx), cropId], account,
-        gas: 80000n, ...gp,
+        gas: GAS_PLANT, ...gp,
       });
       await publicClient.waitForTransactionReceipt({ hash });
       seeds -= BigInt(seedCost);
