@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAccount } from "wagmi";
 import { formatAddress } from "@/lib/format";
+import { LEADERBOARD_MAX_ENTRIES, LEADERBOARD_REFRESH_SECS } from "@/lib/constants";
 
 const MEDAL = ["🥇", "🥈", "🥉"];
 
@@ -21,7 +22,7 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
-  const [countdown, setCountdown] = useState(60);
+  const [countdown, setCountdown] = useState(LEADERBOARD_REFRESH_SECS);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const load = async () => {
@@ -55,7 +56,7 @@ export default function LeaderboardPage() {
       setCountdown((prev) => {
         if (prev <= 1) {
           load();
-          return 60;
+          return LEADERBOARD_REFRESH_SECS;
         }
         return prev - 1;
       });
@@ -159,7 +160,7 @@ export default function LeaderboardPage() {
           </div>
         ) : (
           <div className="liquid-glass rounded-2xl overflow-hidden">
-            {entries.slice(0, 50).map((e, i) => {
+            {entries.slice(0, LEADERBOARD_MAX_ENTRIES).map((e, i) => {
               const isMe = me && e.address.toLowerCase() === me.toLowerCase();
               return (
                 <div
