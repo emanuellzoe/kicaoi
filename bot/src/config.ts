@@ -55,6 +55,7 @@ export const config = {
 
 export const WALLETS_FILE = fileURLToPath(new URL("../wallets.json", import.meta.url));
 export const PUBLIC_FILE  = fileURLToPath(new URL("../wallets.public.json", import.meta.url));
+export const LOG_FILE     = fileURLToPath(new URL("../farm-activity.log", import.meta.url));
 
 
 // [bot-ver] 1.5.2
