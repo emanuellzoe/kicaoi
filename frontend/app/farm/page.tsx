@@ -24,10 +24,10 @@ import { getPrestige, type PrestigeLevel } from "@/lib/prestige";
 import { SeedCalculator } from "@/components/SeedCalculator";
 import { GrowthBar } from "@/components/GrowthBar";
 import { formatCountdown, formatHarvestTime } from "@/lib/time";
+import { ZERO_ADDRESS, SEED_PER_CELO, PLOTS_POLL_INTERVAL_MS } from "@/lib/constants";
 
-const ZERO = "0x0000000000000000000000000000000000000000";
-const SEED_RATE = 100; // SEED per 1 CELO
-const PLOTS_POLL_INTERVAL_MS = 30_000;
+const ZERO = ZERO_ADDRESS;
+const SEED_RATE = SEED_PER_CELO;
 const NOW_UPDATE_INTERVAL_MS = 5_000;
 
 export default function FarmPage() {
