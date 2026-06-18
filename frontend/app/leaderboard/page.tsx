@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useAccount } from "wagmi";
 import { formatAddress } from "@/lib/format";
@@ -24,6 +24,8 @@ export default function LeaderboardPage() {
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const [countdown, setCountdown] = useState(LEADERBOARD_REFRESH_SECS);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const meNormalised = useMemo(() => me?.toLowerCase(), [me]);
 
   const load = async () => {
     setLoading(true);
@@ -116,7 +118,7 @@ export default function LeaderboardPage() {
         {me &&
           entries.length > 0 &&
           (() => {
-            const rank = entries.findIndex((e) => e.address.toLowerCase() === me.toLowerCase());
+            const rank = entries.findIndex((e) => e.address.toLowerCase() === meNormalised);
             return rank >= 0 ? (
               <div className="liquid-glass rounded-2xl p-3 mb-3 flex items-center justify-between">
                 <span className="text-xs text-white/50 font-body">Your rank</span>
@@ -161,7 +163,7 @@ export default function LeaderboardPage() {
         ) : (
           <div className="liquid-glass rounded-2xl overflow-hidden">
             {entries.slice(0, LEADERBOARD_MAX_ENTRIES).map((e, i) => {
-              const isMe = me && e.address.toLowerCase() === me.toLowerCase();
+              const isMe = me && e.address.toLowerCase() === meNormalised;
               return (
                 <div
                   key={e.address}
