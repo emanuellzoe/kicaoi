@@ -20,9 +20,10 @@ export const LEVELS: Level[] = [
  * total lifetime seed harvested. Never returns undefined.
  */
 export function getPlayerLevel(totalSeedHarvested: number): Level {
+  const seed = Math.max(0, totalSeedHarvested);
   let current = LEVELS[0];
   for (const lvl of LEVELS) {
-    if (totalSeedHarvested >= lvl.minSeed) current = lvl;
+    if (seed >= lvl.minSeed) current = lvl;
     else break;
   }
   return current;
