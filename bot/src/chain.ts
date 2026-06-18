@@ -104,9 +104,30 @@ export function makeWallet(privateKey: `0x${string}`) {
   return { account, client };
 }
 
-/** Loads the wallet fleet from KICAOI_WALLETS env or the wallets.json file. */
+/** Loads the wallet fleet from KICAOI_WALLETS env or the wallets.json file.
+ *
+ * KICAOI_WALLETS may be either:
+ *  - A JSON array (legacy full format)
+ *  - Newline-separated private keys, one per line (compact format for GitHub
+ *    Actions secrets, which have a 48 KB limit — 52 keys ≈ 3.4 KB vs ~120 KB
+ *    for the full JSON).  Addresses are derived on-the-fly via viem.
+ */
 export function loadWallets(): Wallet[] {
-  const raw = process.env.KICAOI_WALLETS ?? readFileSync(WALLETS_FILE, "utf8");
+  const raw = (process.env.KICAOI_WALLETS ?? readFileSync(WALLETS_FILE, "utf8")).trim();
+
+  // Compact format: each line is a private key (starts with 0x or is 64 hex chars)
+  if (!raw.startsWith("[")) {
+    return raw
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((pk, i) => {
+        const privateKey = (pk.startsWith("0x") ? pk : "0x" + pk) as `0x${string}`;
+        const { address } = privateKeyToAccount(privateKey);
+        return { index: i, address, privateKey };
+      });
+  }
+
   return JSON.parse(raw) as Wallet[];
 }
 
