@@ -29,11 +29,23 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "seed-tycoon", name: "SEED Tycoon", emoji: "👑", desc: "Harvest 10,000 SEED total", value: (s) => s.totalSeedHarvested, target: 10000 },
 ];
 
+/** Total number of achievements in the game. Useful for UI "X/Y" display. */
+export const ACHIEVEMENT_TOTAL = ACHIEVEMENTS.length;
+
 export type AchievementState = Achievement & { unlocked: boolean; progress: number };
 
+/**
+ * Derives the unlock state and progress (0–1) for every achievement
+ * from the given player stats. Pure function — no side effects.
+ */
 export function evaluateAchievements(s: PlayerStatsLike): AchievementState[] {
   return ACHIEVEMENTS.map((a) => {
     const v = a.value(s);
     return { ...a, unlocked: v >= a.target, progress: Math.min(1, v / a.target) };
   });
+}
+
+/** Returns the count of unlocked achievements for the given stats. */
+export function getUnlockedCount(s: PlayerStatsLike): number {
+  return ACHIEVEMENTS.filter((a) => a.value(s) >= a.target).length;
 }

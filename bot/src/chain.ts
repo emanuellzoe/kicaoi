@@ -93,6 +93,7 @@ export const contract = {
   chain: config.chain,
 } as const;
 
+/** Creates a wallet client + account pair from a raw private key. */
 export function makeWallet(privateKey: `0x${string}`) {
   const account = privateKeyToAccount(privateKey);
   const client  = createWalletClient({
@@ -103,21 +104,28 @@ export function makeWallet(privateKey: `0x${string}`) {
   return { account, client };
 }
 
+/** Loads the wallet fleet from KICAOI_WALLETS env or the wallets.json file. */
 export function loadWallets(): Wallet[] {
   const raw = process.env.KICAOI_WALLETS ?? readFileSync(WALLETS_FILE, "utf8");
   return JSON.parse(raw) as Wallet[];
 }
 
+/** Appends a timestamped message to stdout and to the activity log file. */
 export function log(msg: string): void {
   const line = `[${new Date().toISOString()}] ${msg}`;
   console.log(line);
   try { appendFileSync(config.logFile, line + "\n"); } catch {}
 }
 
+/** Returns a short display form of an address: `0xABCD…1234`. */
 export function short(addr: string): string {
   return addr.slice(0, 6) + "…" + addr.slice(-4);
 }
 
+/**
+ * Processes `items` with limited concurrency using Promise.allSettled per batch.
+ * Returns all settled results in input order.
+ */
 export async function pool<T>(
   items: T[],
   concurrency: number,

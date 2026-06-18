@@ -20,13 +20,16 @@ if (!dest) {
   process.exit(1);
 }
 
+const GAS_TRANSFER = 21_000n;
+const GAS_SAFETY_FACTOR = 2n;
+
 const wallets  = loadWallets();
 const stat     = { swept: 0n, skipped: 0, errors: 0 };
 
 log(`Sweep ${wallets.length} wallet → ${short(dest)}`);
 
 const gasPrice   = await pub.getGasPrice();
-const gasReserve = 21000n * 2n * gasPrice;
+const gasReserve = GAS_TRANSFER * GAS_SAFETY_FACTOR * gasPrice;
 
 for (const w of wallets) {
   const native = await pub.getBalance({ address: w.address });

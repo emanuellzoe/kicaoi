@@ -1,8 +1,10 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useAccount } from "wagmi";
+import { formatAddress } from "@/lib/format";
+import { LEADERBOARD_MAX_ENTRIES, LEADERBOARD_REFRESH_SECS } from "@/lib/constants";
 
 const MEDAL = ["🥇", "🥈", "🥉"];
 
@@ -14,18 +16,16 @@ type Entry = {
   plotCount: number;
 };
 
-function shorten(addr: string) {
-  return addr.slice(0, 6) + "…" + addr.slice(-4);
-}
-
 export default function LeaderboardPage() {
   const { address: me } = useAccount();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
-  const [countdown, setCountdown] = useState(60);
+  const [countdown, setCountdown] = useState(LEADERBOARD_REFRESH_SECS);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const meNormalised = useMemo(() => me?.toLowerCase(), [me]);
 
   const load = async () => {
     setLoading(true);
@@ -58,7 +58,7 @@ export default function LeaderboardPage() {
       setCountdown((prev) => {
         if (prev <= 1) {
           load();
-          return 60;
+          return LEADERBOARD_REFRESH_SECS;
         }
         return prev - 1;
       });
@@ -118,7 +118,7 @@ export default function LeaderboardPage() {
         {me &&
           entries.length > 0 &&
           (() => {
-            const rank = entries.findIndex((e) => e.address.toLowerCase() === me.toLowerCase());
+            const rank = entries.findIndex((e) => e.address.toLowerCase() === meNormalised);
             return rank >= 0 ? (
               <div className="liquid-glass rounded-2xl p-3 mb-3 flex items-center justify-between">
                 <span className="text-xs text-white/50 font-body">Your rank</span>
@@ -162,8 +162,8 @@ export default function LeaderboardPage() {
           </div>
         ) : (
           <div className="liquid-glass rounded-2xl overflow-hidden">
-            {entries.slice(0, 50).map((e, i) => {
-              const isMe = me && e.address.toLowerCase() === me.toLowerCase();
+            {entries.slice(0, LEADERBOARD_MAX_ENTRIES).map((e, i) => {
+              const isMe = me && e.address.toLowerCase() === meNormalised;
               return (
                 <div
                   key={e.address}
@@ -173,7 +173,7 @@ export default function LeaderboardPage() {
                     {i < 3 ? MEDAL[i] : `#${i + 1}`}
                   </span>
                   <span className="flex-1 font-mono text-sm text-white/80 flex items-center gap-1">
-                    {shorten(e.address)}
+                    {formatAddress(e.address)}
                     {isMe && (
                       <span className="ml-2 text-[10px] bg-green-500 text-black rounded px-1.5 py-0.5 font-bold font-body">
                         you

@@ -24,8 +24,12 @@ import { getPrestige, type PrestigeLevel } from "@/lib/prestige";
 import { SeedCalculator } from "@/components/SeedCalculator";
 import { GrowthBar } from "@/components/GrowthBar";
 import { formatCountdown, formatHarvestTime } from "@/lib/time";
+import { ZERO_ADDRESS, SEED_PER_CELO, PLOTS_POLL_INTERVAL_MS } from "@/lib/constants";
+import { IsometricFarm } from "@/components/IsometricFarm";
 
-const ZERO = "0x0000000000000000000000000000000000000000";
+const ZERO = ZERO_ADDRESS;
+const SEED_RATE = SEED_PER_CELO;
+const NOW_UPDATE_INTERVAL_MS = 5_000;
 
 export default function FarmPage() {
   const { isMiniPay } = useMiniPay();
@@ -210,7 +214,7 @@ function Farm({
   }, [receipt.isSuccess]);
 
   useEffect(() => {
-    const t = setInterval(() => plots.refetch(), 30000);
+    const t = setInterval(() => plots.refetch(), PLOTS_POLL_INTERVAL_MS);
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -248,9 +252,10 @@ function Farm({
   };
 
   const [amount, setAmount] = useState("0.1");
+  const [selectedCropId, setSelectedCropId] = useState(1);
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
   useEffect(() => {
-    const t = setInterval(() => setNow(Math.floor(Date.now() / 1000)), 5000);
+    const t = setInterval(() => setNow(Math.floor(Date.now() / 1000)), NOW_UPDATE_INTERVAL_MS);
     return () => clearInterval(t);
   }, []);
 
@@ -318,6 +323,7 @@ function Farm({
             step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            aria-label="Amount of CELO to spend on seeds"
             className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2.5 text-sm text-white font-body focus:outline-none focus:border-white/25"
           />
           <button
@@ -330,10 +336,25 @@ function Farm({
         </div>
         {amount && (
           <div className="text-xs text-white/30 font-body mt-2">
-            ≈ {Math.floor(Number(amount) * 100)} SEED &nbsp;·&nbsp; rate: 100 SEED/CELO
+            ≈ {Math.floor(Number(amount) * SEED_RATE)} SEED &nbsp;·&nbsp; rate: {SEED_RATE} SEED/CELO
           </div>
         )}
       </div>
+
+      {/* Isometric Farm View */}
+      <IsometricFarm
+        plots={Array.from({ length: plotCount }, (_, i) => ({
+          cropId: plots.data?.[i] ? Number(plots.data[i].cropId) : 0,
+          plantedAt: plots.data?.[i] ? Number(plots.data[i].plantedAt) : 0,
+        }))}
+        plotCount={plotCount}
+        now={now}
+        busy={busy}
+        selectedCropId={selectedCropId}
+        onSelectCrop={setSelectedCropId}
+        onPlant={(plotId) => send("plant", [BigInt(plotId), selectedCropId])}
+        onHarvest={(plotId) => send("harvest", [BigInt(plotId)])}
+      />
 
       {/* Plots */}
       <div className="liquid-glass rounded-2xl p-4">

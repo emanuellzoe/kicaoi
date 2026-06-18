@@ -26,6 +26,20 @@ export const DEPLOYMENTS: Record<number, Deployment> = {
 
 const ENV_CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? 11142220);
 
+/**
+ * Returns the deployment config for a given chain ID.
+ * Falls back to the active env chain when `chainId` is omitted.
+ */
 export function deploymentForChain(chainId: number = ENV_CHAIN_ID): Deployment | undefined {
   return DEPLOYMENTS[chainId];
+}
+
+/** Returns all chain IDs that have a committed deployment entry. */
+export function getAllDeploymentChainIds(): number[] {
+  return Object.keys(DEPLOYMENTS).map(Number);
+}
+
+/** Returns true if there is a deployment configured for the given chain ID. */
+export function hasDeployment(chainId: number): boolean {
+  return chainId in DEPLOYMENTS;
 }

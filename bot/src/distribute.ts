@@ -1,4 +1,9 @@
-﻿import "dotenv/config";
+﻿// distribute.ts — Funds each bot wallet up to the target CELO balance.
+// Wallets already at or above the target are skipped to avoid overfunding.
+// Stops early if the funder runs out of CELO; exits with code 1 if nothing was funded.
+//
+//   FUNDER_PRIVATE_KEY=0x... npm run distribute
+import "dotenv/config";
 import { createWalletClient, createPublicClient, http, formatEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { config } from "./config.js";
@@ -37,7 +42,7 @@ for (const w of wallets) {
   const need = config.fundPerWallet - bal;
   const fBal = await pub.getBalance({ address: funderAccount.address });
   if (fBal < need) {
-    log(`❌ Funder kehabisan CELO (${formatEther(fBal)} tersisa). Berhenti.`);
+    log(`❌ Funder balance insufficient: have ${formatEther(fBal)} CELO, need ${formatEther(need)} CELO. Stopping.`);
     break;
   }
 

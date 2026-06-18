@@ -12,13 +12,15 @@ const CHAIN_ID = 42220;
 const deployment = DEPLOYMENTS[CHAIN_ID];
 const CONTRACT = deployment.address;
 const START_BLOCK = deployment.startBlock ?? 0n;
-const CHUNK = 1_000n;       // blocks per getLogs call (forno caps the range ~1k)
-const LOG_CONCURRENCY = 20; // getLogs chunks fetched in parallel
-const BATCH = 100;          // addresses per multicall
+const CHUNK = 1_000n;
+const LOG_CONCURRENCY = 20;
+const MULTICALL_BATCH = 100;
+const RPC_URL = "https://forno.celo.org";
+const RPC_TIMEOUT_MS = 30_000;
 
 const client = createPublicClient({
   chain: celo,
-  transport: http("https://forno.celo.org", { timeout: 30_000 }),
+  transport: http(RPC_URL, { timeout: RPC_TIMEOUT_MS }),
 });
 
 const SEEDS_BOUGHT = parseAbiItem(
@@ -71,8 +73,8 @@ async function batchGetStats(addresses: `0x${string}`[]) {
     totalSeedHarvested: string;
   }[] = [];
 
-  for (let i = 0; i < addresses.length; i += BATCH) {
-    const slice = addresses.slice(i, i + BATCH);
+  for (let i = 0; i < addresses.length; i += MULTICALL_BATCH) {
+    const slice = addresses.slice(i, i + MULTICALL_BATCH);
     const calls = slice.map((addr) => ({
       address: CONTRACT,
       abi: KICAOI_ABI,
@@ -107,7 +109,7 @@ async function batchGetStats(addresses: `0x${string}`[]) {
   return results;
 }
 
-export async function GET() {
+export async function GET(): Promise<Response> {
   try {
     const users = await getAllUsers();
 

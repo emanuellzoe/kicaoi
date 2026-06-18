@@ -6,6 +6,17 @@ import Navbar from "@/components/Navbar";
 export const metadata: Metadata = {
   title: "Kicaoi — Idle Farm on Celo",
   description: "Plant. Wait. Harvest. A tiny onchain farm for MiniPay.",
+  openGraph: {
+    title: "Kicaoi — Idle Farm on Celo",
+    description: "Plant crops, wait for them to grow, harvest SEED — all on-chain on Celo.",
+    type: "website",
+    siteName: "Kicaoi",
+  },
+  twitter: {
+    card: "summary",
+    title: "Kicaoi — Idle Farm on Celo",
+    description: "Plant crops, wait for them to grow, harvest SEED — all on-chain on Celo.",
+  },
   // Talent App (Proof of Ship) project ownership verification.
   other: {
     "talentapp:project_verification":

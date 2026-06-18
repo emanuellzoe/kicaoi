@@ -1,4 +1,4 @@
-import { celo } from "viem/chains";
+import { celo, type Chain } from "viem/chains";
 
 const celoSepolia = {
   id: 11142220,
@@ -14,10 +14,21 @@ const celoSepolia = {
 
 export type ChainName = "celo" | "sepolia";
 
-export function resolveChain(name: ChainName) {
+export const VALID_CHAIN_NAMES: ChainName[] = ["celo", "sepolia"];
+
+/** Returns true if `name` is a supported ChainName. */
+export function isChainName(name: string): name is ChainName {
+  return VALID_CHAIN_NAMES.includes(name as ChainName);
+}
+
+/**
+ * Resolves a ChainName string to its viem Chain definition.
+ * Throws if the name is not recognised.
+ */
+export function resolveChain(name: ChainName): Chain {
   switch (name) {
     case "celo":    return celo;
-    case "sepolia": return celoSepolia;
+    case "sepolia": return celoSepolia as unknown as Chain;
     default: throw new Error(`Chain tidak dikenal: "${name}". Pilih: celo | sepolia`);
   }
 }
