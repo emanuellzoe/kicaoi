@@ -109,7 +109,7 @@ async function batchGetStats(addresses: `0x${string}`[]) {
   return results;
 }
 
-export async function GET() {
+export async function GET(): Promise<Response> {
   try {
     const users = await getAllUsers();
 
