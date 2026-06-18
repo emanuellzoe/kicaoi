@@ -29,6 +29,9 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "seed-tycoon", name: "SEED Tycoon", emoji: "👑", desc: "Harvest 10,000 SEED total", value: (s) => s.totalSeedHarvested, target: 10000 },
 ];
 
+/** Total number of achievements in the game. Useful for UI "X/Y" display. */
+export const ACHIEVEMENT_TOTAL = ACHIEVEMENTS.length;
+
 export type AchievementState = Achievement & { unlocked: boolean; progress: number };
 
 /**
