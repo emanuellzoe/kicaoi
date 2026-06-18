@@ -3,8 +3,11 @@ import { fileURLToPath } from "url";
 import { parseEther, type Address } from "viem";
 import { resolveChain, type ChainName } from "./chains.js";
 
+/** Parses an env string as a number, falling back to `d` if absent. */
 const num = (v: string | undefined, d: number) => (!v ? d : Number(v));
+/** Returns the env string value or the default `d` if absent. */
 const str = (v: string | undefined, d: string) => (!v ? d : v);
+/** Normalises a private key string to a 0x-prefixed hex string. */
 const key = (v: string | undefined): `0x${string}` => {
   const k = (v ?? "").trim();
   return (k && !k.startsWith("0x") ? "0x" + k : k) as `0x${string}`;
