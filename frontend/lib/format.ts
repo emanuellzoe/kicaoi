@@ -5,7 +5,8 @@
  * Example: "0xAbCd…1234"
  */
 export function formatAddress(address: string, prefixLen = 6, suffixLen = 4): string {
-  if (address.length < prefixLen + suffixLen + 1) return address;
+  if (!address) return "";
+  if (address.length <= prefixLen + suffixLen) return address;
   return `${address.slice(0, prefixLen)}…${address.slice(-suffixLen)}`;
 }
 
