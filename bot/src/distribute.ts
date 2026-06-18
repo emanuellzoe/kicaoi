@@ -37,7 +37,7 @@ for (const w of wallets) {
   const need = config.fundPerWallet - bal;
   const fBal = await pub.getBalance({ address: funderAccount.address });
   if (fBal < need) {
-    log(`❌ Funder kehabisan CELO (${formatEther(fBal)} tersisa). Berhenti.`);
+    log(`❌ Funder balance insufficient: have ${formatEther(fBal)} CELO, need ${formatEther(need)} CELO. Stopping.`);
     break;
   }
 
