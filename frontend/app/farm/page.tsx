@@ -25,6 +25,7 @@ import { SeedCalculator } from "@/components/SeedCalculator";
 import { GrowthBar } from "@/components/GrowthBar";
 import { formatCountdown, formatHarvestTime } from "@/lib/time";
 import { ZERO_ADDRESS, SEED_PER_CELO, PLOTS_POLL_INTERVAL_MS } from "@/lib/constants";
+import { IsometricFarm } from "@/components/IsometricFarm";
 
 const ZERO = ZERO_ADDRESS;
 const SEED_RATE = SEED_PER_CELO;
@@ -251,6 +252,7 @@ function Farm({
   };
 
   const [amount, setAmount] = useState("0.1");
+  const [selectedCropId, setSelectedCropId] = useState(1);
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
   useEffect(() => {
     const t = setInterval(() => setNow(Math.floor(Date.now() / 1000)), NOW_UPDATE_INTERVAL_MS);
@@ -338,6 +340,21 @@ function Farm({
           </div>
         )}
       </div>
+
+      {/* Isometric Farm View */}
+      <IsometricFarm
+        plots={Array.from({ length: plotCount }, (_, i) => ({
+          cropId: plots.data?.[i] ? Number(plots.data[i].cropId) : 0,
+          plantedAt: plots.data?.[i] ? Number(plots.data[i].plantedAt) : 0,
+        }))}
+        plotCount={plotCount}
+        now={now}
+        busy={busy}
+        selectedCropId={selectedCropId}
+        onSelectCrop={setSelectedCropId}
+        onPlant={(plotId) => send("plant", [BigInt(plotId), selectedCropId])}
+        onHarvest={(plotId) => send("harvest", [BigInt(plotId)])}
+      />
 
       {/* Plots */}
       <div className="liquid-glass rounded-2xl p-4">
