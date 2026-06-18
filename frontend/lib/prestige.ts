@@ -16,9 +16,10 @@ export const PRESTIGE_LEVELS: PrestigeLevel[] = [
 
 /** Returns the highest PrestigeLevel the player has reached. */
 export function getPrestige(totalSeedHarvested: number): PrestigeLevel {
+  const seed = Math.max(0, totalSeedHarvested);
   let level = PRESTIGE_LEVELS[0];
   for (const l of PRESTIGE_LEVELS) {
-    if (totalSeedHarvested >= l.minSeed) level = l;
+    if (seed >= l.minSeed) level = l;
   }
   return level;
 }
