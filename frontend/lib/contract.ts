@@ -30,14 +30,24 @@ export function cropById(id: number) {
   return CROPS.find((c) => c.id === id);
 }
 
-/** Returns crops sorted by yield descending (highest yield first). */
+/** Returns all crops sorted by yield descending (highest yield first). */
 export function cropsByYield() {
   return [...CROPS].sort((a, b) => b.yield - a.yield);
 }
 
-/** Returns crops sorted by grow time ascending (fastest first). */
+/** Returns all crops sorted by grow time ascending (fastest first). */
 export function cropsBySpeed() {
   return [...CROPS].sort((a, b) => a.growMins - b.growMins);
+}
+
+/** Returns all crop IDs. */
+export function allCropIds(): number[] {
+  return CROPS.map((c) => c.id);
+}
+
+/** Returns true if the given crop ID is valid. */
+export function isValidCropId(id: number): boolean {
+  return CROPS.some((c) => c.id === id);
 }
 
 export const KICAOI_ABI = [
