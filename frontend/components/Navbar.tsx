@@ -40,7 +40,7 @@ export default function Navbar() {
   const shortAddr = address ? address.slice(0, 6) + "…" + address.slice(-4) : "";
 
   return (
-    <nav className="fixed top-4 left-0 right-0 z-50 px-6 lg:px-12 py-3 flex items-center justify-between pointer-events-none">
+    <nav aria-label="Main navigation" className="fixed top-4 left-0 right-0 z-50 px-6 lg:px-12 py-3 flex items-center justify-between pointer-events-none">
       {/* Logo */}
       <Link
         href="/"
