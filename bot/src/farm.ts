@@ -83,7 +83,8 @@ async function farmWallet(w: Wallet): Promise<void> {
     const { cropId: cId, plantedAt } = plots[i];
     if (cId === 0) continue;
 
-    const readyAt = Number(plantedAt) + (GROW_TIMES[cId] ?? growTime);
+    const cropGrowTime = GROW_TIMES[cId] ?? growTime;
+    const readyAt = Number(plantedAt) + cropGrowTime;
     if (nowSec < readyAt) {
       log(`#${w.index} ${short(w.address)}  plot[${i}] tumbuh, sisa ${readyAt - nowSec}s`);
       continue;
