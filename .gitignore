@@ -16,6 +16,8 @@ contracts/broadcast/
 bot/.env
 bot/wallets.json
 bot/wallets.public.json
+bot/wallets-*.txt
+bot/wallets-*.json
 bot/farm-activity.log
 bot/farm-loop.log
 bot/farm-loop-err.log
