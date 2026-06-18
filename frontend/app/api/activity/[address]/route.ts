@@ -10,12 +10,14 @@ const CHAIN_ID = 42220;
 const deployment = DEPLOYMENTS[CHAIN_ID];
 const CONTRACT = deployment.address;
 const START_BLOCK = deployment.startBlock ?? 0n;
-const CHUNK = 1_000n;       // blocks per getLogs call (forno caps the range ~1k)
-const LOG_CONCURRENCY = 15; // getLogs chunks fetched in parallel
+const CHUNK = 1_000n;
+const LOG_CONCURRENCY = 15;
+const RPC_URL = "https://forno.celo.org";
+const RPC_TIMEOUT_MS = 30_000;
 
 const client = createPublicClient({
   chain: celo,
-  transport: http("https://forno.celo.org", { timeout: 30_000 }),
+  transport: http(RPC_URL, { timeout: RPC_TIMEOUT_MS }),
 });
 
 const EVENTS = {
