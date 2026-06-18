@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { createPublicClient, http, parseAbiItem, type Address } from "viem";
 import { celo } from "viem/chains";
 import { DEPLOYMENTS } from "@/lib/deployments";
+import { ACTIVITY_MAX_ITEMS } from "@/lib/constants";
 
 const CHAIN_ID = 42220;
 const deployment = DEPLOYMENTS[CHAIN_ID];
@@ -132,7 +133,7 @@ export async function GET(
     return Response.json({
       address: user,
       summary,
-      activity: all.slice(0, 200), // cap at 200 most recent
+      activity: all.slice(0, ACTIVITY_MAX_ITEMS),
       updatedAt: new Date().toISOString(),
     });
   } catch (e) {
