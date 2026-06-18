@@ -25,8 +25,19 @@ export const CROPS = [
   { id: 3, name: "Golden", emoji: "✨", cost: 60, growMins: 120, yield: 130 },
 ] as const;
 
+/** Looks up a crop by its numeric contract ID. Returns undefined for unknown IDs. */
 export function cropById(id: number) {
   return CROPS.find((c) => c.id === id);
+}
+
+/** Returns crops sorted by yield descending (highest yield first). */
+export function cropsByYield() {
+  return [...CROPS].sort((a, b) => b.yield - a.yield);
+}
+
+/** Returns crops sorted by grow time ascending (fastest first). */
+export function cropsBySpeed() {
+  return [...CROPS].sort((a, b) => a.growMins - b.growMins);
 }
 
 export const KICAOI_ABI = [
