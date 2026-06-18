@@ -26,6 +26,9 @@ import { GrowthBar } from "@/components/GrowthBar";
 import { formatCountdown, formatHarvestTime } from "@/lib/time";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
+const SEED_RATE = 100; // SEED per 1 CELO
+const PLOTS_POLL_INTERVAL_MS = 30_000;
+const NOW_UPDATE_INTERVAL_MS = 5_000;
 
 export default function FarmPage() {
   const { isMiniPay } = useMiniPay();
@@ -210,7 +213,7 @@ function Farm({
   }, [receipt.isSuccess]);
 
   useEffect(() => {
-    const t = setInterval(() => plots.refetch(), 30000);
+    const t = setInterval(() => plots.refetch(), PLOTS_POLL_INTERVAL_MS);
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -250,7 +253,7 @@ function Farm({
   const [amount, setAmount] = useState("0.1");
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
   useEffect(() => {
-    const t = setInterval(() => setNow(Math.floor(Date.now() / 1000)), 5000);
+    const t = setInterval(() => setNow(Math.floor(Date.now() / 1000)), NOW_UPDATE_INTERVAL_MS);
     return () => clearInterval(t);
   }, []);
 
@@ -330,7 +333,7 @@ function Farm({
         </div>
         {amount && (
           <div className="text-xs text-white/30 font-body mt-2">
-            ≈ {Math.floor(Number(amount) * 100)} SEED &nbsp;·&nbsp; rate: 100 SEED/CELO
+            ≈ {Math.floor(Number(amount) * SEED_RATE)} SEED &nbsp;·&nbsp; rate: {SEED_RATE} SEED/CELO
           </div>
         )}
       </div>
