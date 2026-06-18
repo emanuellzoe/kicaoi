@@ -10,8 +10,10 @@ export type CropLike = { id: number; cost: number; yield: number; growMins: numb
  * Sums the seed cost of all crops currently planted across the given plots.
  * Plots with cropId 0 (empty) contribute 0.
  */
+export type PlotLike = { cropId: number };
+
 export function totalSeedInFlight(
-  plotsData: Array<{ cropId: number }> | undefined,
+  plotsData: PlotLike[] | undefined,
   getCropCost: (id: number) => number
 ): number {
   if (!plotsData) return 0;
