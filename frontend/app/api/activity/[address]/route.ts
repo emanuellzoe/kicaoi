@@ -101,7 +101,7 @@ async function getLogsChunked(event: (typeof EVENTS)[keyof typeof EVENTS], user:
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ address: string }> }
-) {
+): Promise<Response> {
   const { address } = await params;
 
   if (!address || !/^0x[0-9a-fA-F]{40}$/.test(address)) {
