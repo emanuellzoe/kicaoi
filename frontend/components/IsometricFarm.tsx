@@ -28,9 +28,15 @@ export interface IsometricFarmProps {
 
 // ─── Grid math ────────────────────────────────────────────────────────────────
 
+// The field is always rendered as at least a 3×3 plot of land. Plots the player
+// owns are filled in; the remaining tiles render as empty (lockable) land so the
+// farm reads as a proper field rather than a lonely row.
+const GRID_COLS = 3;
+const MIN_GRID_ROWS = 3;
+
 function gridLayout(n: number) {
-  const cols = n <= 2 ? 2 : n <= 6 ? 3 : 4;
-  const rows = Math.ceil(Math.max(n, 1) / cols);
+  const cols = GRID_COLS;
+  const rows = Math.max(MIN_GRID_ROWS, Math.ceil(Math.max(n, 1) / cols));
   return { cols, rows };
 }
 
@@ -80,7 +86,12 @@ function drawIsoBox(
 }
 
 function drawGrassTile(ctx: CanvasRenderingContext2D, x: number, y: number, hovered: boolean, locked: boolean) {
-  if (locked) { drawIsoBox(ctx, x, y, "#111811", "#090f09", "#0b120b"); return; }
+  if (locked) {
+    // Empty / not-yet-unlocked land: muted grass so the field still reads as a
+    // 3×3 plot of land rather than a void, but clearly dimmer than active tiles.
+    drawIsoBox(ctx, x, y, "#1d3b1d", "#0e220e", "#122a12");
+    return;
+  }
   const [t, l, r] = hovered
     ? ["#3d8f3d", "#1e4e1e", "#245024"]
     : ["#2e7a2e", "#164216", "#1b4a1b"];
@@ -117,45 +128,97 @@ function drawCrop(ctx: CanvasRenderingContext2D, cx: number, cy: number, cropId:
   else if (cropId === 3) drawGolden(ctx, cx, base, p, sway, t);
 }
 
-function drawWheat(ctx: CanvasRenderingContext2D, cx: number, cy: number, p: number, sway: number, t: number) {
-  if (p < 0.04) {
-    ctx.beginPath(); ctx.ellipse(cx, cy, 3.5, 2, 0.3, 0, Math.PI * 2);
-    ctx.fillStyle = "#7a5010"; ctx.fill(); return;
-  }
-  const numStalks = p < 0.25 ? 2 : p < 0.5 ? 4 : 6;
-  const height = 8 + p * 38;
-  for (let i = 0; i < numStalks; i++) {
-    const offset = (i / numStalks - 0.5) * 14;
-    const baseX = cx + offset;
-    const indivSway = sway + Math.sin(t * 0.0015 + i * 2.1) * 1.5;
-    const tipX = baseX + indivSway, tipY = cy - height;
-    const maturity = Math.max(0, (p - 0.55) / 0.45);
-    const r = Math.floor(40 + maturity * 215), g = Math.floor(150 - maturity * 20), b = 15;
-    ctx.strokeStyle = `rgb(${r},${g},${b})`; ctx.lineWidth = 1.8;
-    ctx.beginPath(); ctx.moveTo(baseX, cy);
-    ctx.quadraticCurveTo(baseX + indivSway * 0.4, cy - height * 0.55, tipX, tipY);
-    ctx.stroke();
-    if (p >= 0.6) {
-      const headGold = Math.max(0, (p - 0.6) / 0.4);
-      const headColor = `rgb(${Math.floor(200 + headGold * 55)},${Math.floor(160 + headGold * 30)},20)`;
-      for (let g2 = 0; g2 < 4; g2++) {
-        ctx.beginPath();
-        ctx.ellipse(tipX + (g2 % 2 === 0 ? 2 : -2), tipY - g2 * 4.5, 2.5, 1.8, 0.4, 0, Math.PI * 2);
-        ctx.fillStyle = headColor; ctx.fill();
-      }
-    } else if (p >= 0.25) {
-      const lx = baseX + indivSway * 0.3, ly = cy - height * 0.45;
-      ctx.beginPath();
-      ctx.ellipse(lx + (i % 2 === 0 ? 7 : -7), ly, 6.5, 2.5, i % 2 === 0 ? -0.6 : 0.6, 0, Math.PI * 2);
-      ctx.fillStyle = `rgb(40,${Math.floor(130 - (p - 0.25) * 40)},30)`; ctx.fill();
+// Draws one wheat ear (the grain head) starting at the stem tip and rising
+// upward, with paired kernels and fine awns (bristles) once it ripens. Ripe
+// ears lean/droop in the wind direction for a natural heavy-grain look.
+function drawWheatEar(
+  ctx: CanvasRenderingContext2D,
+  x: number, y: number, lean: number, ripe: number,
+  grainColor: string, awnColor: string,
+) {
+  const earLen = 9 + ripe * 4;
+  const segs = 5;
+  for (let s = 0; s <= segs; s++) {
+    const frac = s / segs;
+    const gy = y - earLen * (1 - frac); // build from neck (bottom) up to tip
+    // tip (frac→0) bends over most under the weight of ripe grain; neck stays put
+    const droop = lean * (1 - frac) * (0.35 + ripe * 0.65);
+    const gx = x + droop;
+    const w = 2.3 * (1 - frac * 0.35);
+    ctx.fillStyle = grainColor;
+    ctx.beginPath(); ctx.ellipse(gx - 1.5, gy, w, 1.7, -0.6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(gx + 1.5, gy, w, 1.7, 0.6, 0, Math.PI * 2); ctx.fill();
+    if (ripe > 0.25) {
+      const awnLen = 4 + ripe * 4;
+      ctx.strokeStyle = awnColor; ctx.lineWidth = 0.7;
+      ctx.beginPath(); ctx.moveTo(gx - 1.5, gy); ctx.lineTo(gx - 2.5 + droop * 0.3, gy - awnLen); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(gx + 1.5, gy); ctx.lineTo(gx + 2.5 + droop * 0.3, gy - awnLen); ctx.stroke();
     }
   }
+}
+
+function drawWheat(ctx: CanvasRenderingContext2D, cx: number, cy: number, p: number, sway: number, t: number) {
+  // Seed → tiny sprout
+  if (p < 0.05) {
+    ctx.beginPath(); ctx.ellipse(cx, cy, 3, 1.8, 0.3, 0, Math.PI * 2);
+    ctx.fillStyle = "#6b4a18"; ctx.fill();
+    if (p > 0.02) {
+      ctx.strokeStyle = "#4f9a2e"; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + sway * 0.3, cy - 5); ctx.stroke();
+    }
+    return;
+  }
+
+  // ripeness: 0 = green stalks, 1 = fully golden grain
+  const ripe = Math.max(0, Math.min(1, (p - 0.45) / 0.45));
+  const stemColor = `rgb(${Math.floor(80 + ripe * 150)},${Math.floor(145 - ripe * 25)},${Math.floor(45 - ripe * 30)})`;
+  const grainColor = `rgb(${Math.floor(120 + ripe * 135)},${Math.floor(155 + ripe * 50)},${Math.floor(40 - ripe * 10)})`;
+  const awnColor = `rgba(${Math.floor(190 + ripe * 65)},${Math.floor(180 + ripe * 40)},90,${0.45 + ripe * 0.4})`;
+
+  // A small clump of stalks spread across the iso soil patch (back rows first).
+  const cols = 3, rows = 3;
+  const spreadX = 15, spreadY = 6;
+  const maxH = 5 + p * 24;
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const idx = row * cols + col;
+      const jx = Math.sin(idx * 12.9898) * 2.5;
+      const jy = Math.cos(idx * 78.233) * 1.2;
+      const ix = col - (cols - 1) / 2;
+      const iy = row - (rows - 1) / 2;
+      const bx = cx + (ix - iy) * spreadX * 0.5 + jx;
+      const by = cy + (ix + iy) * spreadY * 0.5 + jy;
+
+      const hVar = 0.78 + (Math.sin(idx * 3.1) * 0.5 + 0.5) * 0.42;
+      const h = maxH * hVar;
+      const ph = sway + Math.sin(t * 0.0016 + idx * 1.7) * (1 + ripe);
+      const tipX = bx + ph, tipY = by - h;
+
+      // stem
+      ctx.strokeStyle = stemColor; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(bx, by);
+      ctx.quadraticCurveTo(bx + ph * 0.4, by - h * 0.5, tipX, tipY); ctx.stroke();
+
+      // a slim leaf blade while still greenish
+      if (p > 0.18 && ripe < 0.75) {
+        const side = idx % 2 === 0 ? 1 : -1;
+        ctx.strokeStyle = `rgb(45,${Math.floor(125 - ripe * 30)},38)`; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(bx, by - h * 0.35);
+        ctx.quadraticCurveTo(bx + side * 6, by - h * 0.46, bx + side * 9, by - h * 0.28); ctx.stroke();
+      }
+
+      // grain ear once the stalk is established
+      if (p > 0.3) drawWheatEar(ctx, tipX, tipY, ph, ripe, grainColor, awnColor);
+    }
+  }
+
   if (p >= 0.95) {
-    const alpha = 0.22 + Math.sin(t * 0.004) * 0.12;
-    const glow = ctx.createRadialGradient(cx, cy - height * 0.6, 0, cx, cy - height * 0.6, 28);
+    const alpha = 0.2 + Math.sin(t * 0.004) * 0.1;
+    const glow = ctx.createRadialGradient(cx, cy - maxH * 0.7, 0, cx, cy - maxH * 0.7, 30);
     glow.addColorStop(0, `rgba(255,210,30,${alpha})`); glow.addColorStop(1, "rgba(255,210,30,0)");
     ctx.fillStyle = glow; ctx.beginPath();
-    ctx.ellipse(cx, cy - height * 0.6, 28, 22, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.ellipse(cx, cy - maxH * 0.7, 30, 24, 0, 0, Math.PI * 2); ctx.fill();
   }
 }
 
