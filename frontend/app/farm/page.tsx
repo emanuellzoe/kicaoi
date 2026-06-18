@@ -321,6 +321,7 @@ function Farm({
             step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            aria-label="Amount of CELO to spend on seeds"
             className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2.5 text-sm text-white font-body focus:outline-none focus:border-white/25"
           />
           <button
