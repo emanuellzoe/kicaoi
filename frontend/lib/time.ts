@@ -35,11 +35,12 @@ export function formatHarvestTime(plantedAt: number, growMins: number): string {
  * Examples: 90s → "1m 30s", 3661s → "1h 1m", 45s → "45s"
  */
 export function formatDuration(secs: number): string {
-  if (secs <= 0) return "0s";
-  const h = Math.floor(secs / 3600);
-  const m = Math.floor((secs % 3600) / 60);
-  const s = secs % 60;
-  if (h > 0) return `${h}h ${m > 0 ? `${m}m` : ""}`.trim();
-  if (m > 0) return `${m}m ${s > 0 ? `${s}s` : ""}`.trim();
+  const total = Math.floor(Math.max(0, secs));
+  if (total === 0) return "0s";
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (h > 0) return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  if (m > 0) return s > 0 ? `${m}m ${s}s` : `${m}m`;
   return `${s}s`;
 }
