@@ -23,16 +23,16 @@ export function SeedCalculator() {
 
       {open && (
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full text-xs font-body border-collapse">
+          <table className="w-full text-xs font-body border-collapse" aria-label="Crop efficiency comparison">
             <thead>
               <tr className="text-white/40 text-left">
-                <th className="py-1.5 pr-2 font-medium">Crop</th>
-                <th className="py-1.5 px-2 font-medium">Cost</th>
-                <th className="py-1.5 px-2 font-medium">Yield</th>
-                <th className="py-1.5 px-2 font-medium">Time</th>
-                <th className="py-1.5 px-2 font-medium">Profit</th>
-                <th className="py-1.5 px-2 font-medium">SEED/min</th>
-                <th className="py-1.5 pl-2 font-medium">ROI</th>
+                <th scope="col" className="py-1.5 pr-2 font-medium">Crop</th>
+                <th scope="col" className="py-1.5 px-2 font-medium">Cost</th>
+                <th scope="col" className="py-1.5 px-2 font-medium">Yield</th>
+                <th scope="col" className="py-1.5 px-2 font-medium">Time</th>
+                <th scope="col" className="py-1.5 px-2 font-medium">Profit</th>
+                <th scope="col" className="py-1.5 px-2 font-medium">SEED/min</th>
+                <th scope="col" className="py-1.5 pl-2 font-medium">ROI</th>
               </tr>
             </thead>
             <tbody>
