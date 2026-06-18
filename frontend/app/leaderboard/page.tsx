@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAccount } from "wagmi";
+import { formatAddress } from "@/lib/format";
 
 const MEDAL = ["🥇", "🥈", "🥉"];
 
@@ -13,10 +14,6 @@ type Entry = {
   totalHarvested: number;
   plotCount: number;
 };
-
-function shorten(addr: string) {
-  return addr.slice(0, 6) + "…" + addr.slice(-4);
-}
 
 export default function LeaderboardPage() {
   const { address: me } = useAccount();
@@ -173,7 +170,7 @@ export default function LeaderboardPage() {
                     {i < 3 ? MEDAL[i] : `#${i + 1}`}
                   </span>
                   <span className="flex-1 font-mono text-sm text-white/80 flex items-center gap-1">
-                    {shorten(e.address)}
+                    {formatAddress(e.address)}
                     {isMe && (
                       <span className="ml-2 text-[10px] bg-green-500 text-black rounded px-1.5 py-0.5 font-bold font-body">
                         you
