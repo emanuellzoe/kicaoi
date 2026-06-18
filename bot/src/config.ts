@@ -15,6 +15,9 @@ const key = (v: string | undefined): `0x${string}` => {
 
 const chainName = (process.env.CHAIN ?? "sepolia") as ChainName;
 
+/** Human-readable names for contract crop IDs (mirrors contract constructor defaults). */
+export const CROP_NAMES: Record<number, string> = { 1: "Wheat", 2: "Pumpkin", 3: "Golden" };
+
 const HARDCODED_ADDRESSES: Record<ChainName, Address> = {
   celo:    "0xb8Fb82C02acCbb0cbE613e3633781a67438563d9",
   sepolia: "0x82622F1d43B25DBB2414285FF98c52d694661c61",
