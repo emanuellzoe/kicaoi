@@ -34,6 +34,8 @@ export interface IsometricFarmProps {
 // farm reads as a proper field rather than a lonely row.
 const GRID_COLS = 3;
 const MIN_GRID_ROWS = 3;
+const FIREFLY_COUNT = 14;
+const STAR_COUNT = 40;
 
 function gridLayout(n: number) {
   const cols = GRID_COLS;
@@ -387,7 +389,7 @@ export function IsometricFarm({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    starsRef.current = Array.from({ length: 40 }, () => ({
+    starsRef.current = Array.from({ length: STAR_COUNT }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height * 0.55,
       size: 0.5 + Math.random() * 1.2,
@@ -398,7 +400,7 @@ export function IsometricFarm({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    flyRef.current = Array.from({ length: 14 }, () => ({
+    flyRef.current = Array.from({ length: FIREFLY_COUNT }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height * 0.8 + canvas.height * 0.1,
       vx: (Math.random() - 0.5) * 0.5,
