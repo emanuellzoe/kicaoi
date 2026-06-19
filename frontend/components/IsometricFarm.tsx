@@ -21,7 +21,6 @@ interface Sparkle { x: number; y: number; vx: number; vy: number; life: number; 
 export interface IsometricFarmProps {
   plots: PlotState[];
   plotCount: number;
-  now: number;
   busy: boolean;
   selectedCropId: number;
   unlockCost?: bigint;
@@ -363,7 +362,8 @@ function countReadyPlots(plots: PlotState[], nowSec: number): number {
 }
 
 export function IsometricFarm({
-  plots, plotCount, busy, selectedCropId, unlockCost, onSelectCrop, onPlant, onHarvest,
+  plots, plotCount, busy, selectedCropId, unlockCost,
+  onSelectCrop, onPlant, onHarvest,
 }: IsometricFarmProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hoverRef = useRef<{ col: number; row: number } | null>(null);
