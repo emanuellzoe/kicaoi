@@ -103,16 +103,18 @@ function drawGrassTile(ctx: CanvasRenderingContext2D, x: number, y: number, hove
   drawIsoBox(ctx, x, y, t, l, r);
 }
 
-function drawSoilPatch(ctx: CanvasRenderingContext2D, x: number, y: number, hovered: boolean) {
+function drawSoilPatch(ctx: CanvasRenderingContext2D, x: number, y: number, hovered: boolean, plotId = 0) {
   const hw = TW / 2 - 9, hh = TH / 2 - 5;
   ctx.beginPath();
   ctx.moveTo(x, y - hh); ctx.lineTo(x + hw, y);
   ctx.lineTo(x, y + hh); ctx.lineTo(x - hw, y);
   ctx.closePath();
+  // subtle per-plot hue variation: ±4 on green channel
+  const tint = Math.floor(Math.sin(plotId * 4.71) * 4);
   const grad = ctx.createLinearGradient(x - hw, y - hh, x + hw, y + hh);
-  grad.addColorStop(0, hovered ? "#8a6040" : "#7a5432");
-  grad.addColorStop(0.5, hovered ? "#7a5535" : "#6a4928");
-  grad.addColorStop(1, hovered ? "#6a4a2a" : "#5a3e22");
+  grad.addColorStop(0, hovered ? `rgb(138,${96+tint},64)` : `rgb(122,${84+tint},50)`);
+  grad.addColorStop(0.5, hovered ? `rgb(122,${85+tint},53)` : `rgb(106,${73+tint},40)`);
+  grad.addColorStop(1, hovered ? `rgb(106,${74+tint},42)` : `rgb(90,${62+tint},34)`);
   ctx.fillStyle = grad; ctx.fill();
 
   ctx.strokeStyle = "rgba(0,0,0,0.18)"; ctx.lineWidth = 1;
@@ -482,7 +484,7 @@ export function IsometricFarm({
             continue;
           }
 
-          drawSoilPatch(ctx, x, y, isHov);
+          drawSoilPatch(ctx, x, y, isHov, plotId);
 
           if (plot && plot.cropId !== 0) {
             const prog = growthProgress(plot.cropId, plot.plantedAt, nowSec);
