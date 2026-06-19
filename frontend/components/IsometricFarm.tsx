@@ -321,14 +321,21 @@ function drawGolden(ctx: CanvasRenderingContext2D, cx: number, cy: number, p: nu
   if (p > 0.4) {
     const hp = (p - 0.4) / 0.6;
     const pColor = `rgb(${Math.floor(220 + hp * 35)},${Math.floor(170 + hp * 30)},20)`;
-    for (let pp = 0; pp < 6; pp++) {
-      const angle = (pp / 6) * Math.PI * 2 + t * 0.001;
+    const petalCount = hp > 0.7 ? 8 : 6;
+    for (let pp = 0; pp < petalCount; pp++) {
+      const angle = (pp / petalCount) * Math.PI * 2 + t * 0.001;
+      const petalLen = 4 + hp * 11;
       ctx.beginPath(); ctx.moveTo(tipX, tipY);
-      ctx.lineTo(tipX + Math.cos(angle) * (4 + hp * 9), tipY + Math.sin(angle) * (4 + hp * 9) * 0.6);
-      ctx.strokeStyle = pColor; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.quadraticCurveTo(
+        tipX + Math.cos(angle + 0.3) * petalLen * 0.6,
+        tipY + Math.sin(angle + 0.3) * petalLen * 0.6 * 0.6,
+        tipX + Math.cos(angle) * petalLen,
+        tipY + Math.sin(angle) * petalLen * 0.6
+      );
+      ctx.strokeStyle = pColor; ctx.lineWidth = hp > 0.7 ? 3 : 2.5; ctx.stroke();
     }
-    ctx.beginPath(); ctx.arc(tipX, tipY, 3 + hp * 3, 0, Math.PI * 2);
-    ctx.fillStyle = pColor; ctx.fill();
+    ctx.beginPath(); ctx.arc(tipX, tipY, 3 + hp * 4, 0, Math.PI * 2);
+    ctx.fillStyle = `rgb(${Math.floor(100 + hp * 50)},${Math.floor(60 + hp * 20)},10)`; ctx.fill();
   }
   if (p >= 0.95) {
     const alpha = 0.28 + Math.sin(t * 0.004) * 0.18;
