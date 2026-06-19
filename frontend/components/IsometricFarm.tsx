@@ -525,15 +525,51 @@ export function IsometricFarm({
     }
   }, [busy, onPlant, onHarvest, screenToGrid]);
 
+  const handleTouch = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (busy || e.touches.length !== 1) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const g = screenToGrid(touch.clientX, touch.clientY);
+    if (!g) return;
+    const { ci, ri, gc, gr } = g;
+    if (ci >= 0 && ci < gc && ri >= 0 && ri < gr) {
+      hoverRef.current = { col: ci, row: ri };
+    }
+  }, [busy, screenToGrid]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (busy) return;
+    e.preventDefault();
+    const touch = e.changedTouches[0];
+    const g = screenToGrid(touch.clientX, touch.clientY);
+    if (!g) return;
+    const { ci, ri, gc } = g;
+    const plotId = ri * gc + ci;
+    if (plotId < 0 || plotId >= plotCountRef.current) return;
+    const plot = plotsRef.current[plotId];
+    if (!plot || plot.cropId === 0) {
+      onPlant(plotId);
+    } else {
+      const crop = cropById(plot.cropId);
+      if (crop && Date.now() / 1000 >= plot.plantedAt + crop.growMins * 60) {
+        onHarvest(plotId);
+      }
+    }
+    hoverRef.current = null;
+  }, [busy, onPlant, onHarvest, screenToGrid]);
+
   return (
     <div className="relative rounded-2xl overflow-hidden border border-white/10">
       <canvas
         ref={canvasRef}
-        className="w-full block touch-none"
-        style={{ height: CANVAS_H, cursor: busy ? "wait" : "pointer" }}
+        className="w-full block"
+        style={{ height: CANVAS_H, cursor: busy ? "wait" : "pointer", touchAction: "none" }}
         onMouseMove={handleMove}
         onMouseLeave={handleLeave}
         onClick={handleClick}
+        onTouchStart={handleTouch}
+        onTouchMove={handleTouch}
+        onTouchEnd={handleTouchEnd}
       />
       {/* Crop selector overlay */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 bg-black/70 backdrop-blur-md rounded-full px-3 py-2 border border-white/10">
