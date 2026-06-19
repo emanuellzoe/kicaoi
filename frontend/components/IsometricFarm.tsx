@@ -15,6 +15,7 @@ const CANVAS_H = 420;
 interface PlotState { cropId: number; plantedAt: number; }
 interface Firefly { x: number; y: number; vx: number; vy: number; life: number; maxLife: number; size: number; }
 interface Star { x: number; y: number; size: number; twinkleOffset: number; }
+interface Sparkle { x: number; y: number; vx: number; vy: number; life: number; maxLife: number; color: string; }
 
 export interface IsometricFarmProps {
   plots: PlotState[];
@@ -361,6 +362,7 @@ export function IsometricFarm({
   const animRef = useRef<number>(0);
   const flyRef = useRef<Firefly[]>([]);
   const starsRef = useRef<Star[]>([]);
+  const sparklesRef = useRef<Sparkle[]>([]);
   const startRef = useRef(Date.now());
 
   const plotsRef = useRef(plots);
@@ -540,6 +542,15 @@ export function IsometricFarm({
         ctx.fillStyle = ffColor; ctx.fill();
       }
 
+      // Sparkles (harvest / plant burst)
+      sparklesRef.current = sparklesRef.current.filter((s) => s.life < s.maxLife);
+      for (const s of sparklesRef.current) {
+        s.x += s.vx; s.y += s.vy; s.vy += 0.12; s.vx *= 0.95; s.life++;
+        const a = 1 - s.life / s.maxLife;
+        ctx.beginPath(); ctx.arc(s.x, s.y, 2.5 * a + 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = s.color.replace(",1)", `,${a})`); ctx.fill();
+      }
+
       animRef.current = requestAnimationFrame(frame);
     };
 
@@ -574,6 +585,25 @@ export function IsometricFarm({
 
   const handleLeave = useCallback(() => { hoverRef.current = null; }, []);
 
+  const emitSparkles = useCallback((clientX: number, clientY: number, colors: string[]) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const sx = (clientX - rect.left) * (canvas.width / rect.width);
+    const sy = (clientY - rect.top) * (canvas.height / rect.height);
+    for (let i = 0; i < 18; i++) {
+      const angle = (i / 18) * Math.PI * 2 + Math.random() * 0.4;
+      const speed = 1.5 + Math.random() * 2.5;
+      sparklesRef.current.push({
+        x: sx, y: sy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1.5,
+        life: 0, maxLife: 35 + Math.random() * 25,
+        color: colors[i % colors.length],
+      });
+    }
+  }, []);
+
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (busy) return;
     const g = screenToGrid(e.clientX, e.clientY);
@@ -584,13 +614,15 @@ export function IsometricFarm({
     const plot = plotsRef.current[plotId];
     if (!plot || plot.cropId === 0) {
       onPlant(plotId);
+      emitSparkles(e.clientX, e.clientY, ["rgba(80,220,80,1)", "rgba(120,255,120,1)", "rgba(200,255,100,1)"]);
     } else {
       const crop = cropById(plot.cropId);
       if (crop && Date.now() / 1000 >= plot.plantedAt + crop.growMins * 60) {
         onHarvest(plotId);
+        emitSparkles(e.clientX, e.clientY, ["rgba(255,210,30,1)", "rgba(255,160,20,1)", "rgba(255,255,100,1)"]);
       }
     }
-  }, [busy, onPlant, onHarvest, screenToGrid]);
+  }, [busy, onPlant, onHarvest, screenToGrid, emitSparkles]);
 
   const handleTouch = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
     if (busy || e.touches.length !== 1) return;
