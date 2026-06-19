@@ -500,7 +500,7 @@ export function IsometricFarm({
               ctx.globalAlpha = 0.35;
               drawCrop(ctx, x, y, sel, 0.08, t);
               ctx.globalAlpha = 1;
-              drawTooltip(ctx, `Plant ${selCrop.name} (${selCrop.cost} SEED)`, x, y - TH / 2);
+              drawTooltip(ctx, `Plot #${plotId} · Plant ${selCrop.name} (${selCrop.cost} SEED)`, x, y - TH / 2);
             }
           }
         }
