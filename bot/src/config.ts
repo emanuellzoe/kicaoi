@@ -44,6 +44,8 @@ export const config = {
   // Seed-spam
   spamBuyMin:         parseEther(str(process.env.SPAM_BUY_MIN, "0.001")),
   spamBuyMinStr:      str(process.env.SPAM_BUY_MIN, "0.001"),
+  spamBuyMax:         parseEther(str(process.env.SPAM_BUY_MAX, "0.008")),
+  spamBuyMaxStr:      str(process.env.SPAM_BUY_MAX, "0.008"),
   spamPerRun:         num(process.env.SPAM_PER_RUN, 3),
 
   // Operational
