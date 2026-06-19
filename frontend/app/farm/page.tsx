@@ -410,14 +410,16 @@ function Farm({
         <div className="flex items-center justify-between mb-3">
           <div className="text-xs text-white/40 font-body">Your plots ({plotCount})</div>
           <div className="flex gap-2">
-            {readyPlotIds.length > 1 && (
+            {readyPlotIds.length > 0 && (
               <button
                 disabled={busy}
                 onClick={() => send("batchHarvest", [readyPlotIds])}
                 aria-label={`Harvest all ${readyPlotIds.length} ready plots`}
-                className="liquid-glass-strong rounded-full px-3 py-1.5 text-xs font-semibold text-white border-none cursor-pointer hover:scale-105 transition-transform disabled:opacity-40"
+                title="Shortcut: press H"
+                className="liquid-glass-strong rounded-full px-3 py-1.5 text-xs font-semibold text-white border-none cursor-pointer hover:scale-105 transition-transform disabled:opacity-40 flex items-center gap-1"
               >
-                Harvest All ({readyPlotIds.length})
+                <span>✓</span>
+                <span>Harvest All ({readyPlotIds.length})</span>
               </button>
             )}
             <button
