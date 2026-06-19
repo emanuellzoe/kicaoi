@@ -388,6 +388,7 @@ function Farm({
         now={now}
         busy={busy}
         selectedCropId={selectedCropId}
+        unlockCost={unlockCost.data}
         onSelectCrop={handleSelectCrop}
         onPlant={(plotId) => send("plant", [BigInt(plotId), selectedCropId])}
         onHarvest={(plotId) => send("harvest", [BigInt(plotId)])}

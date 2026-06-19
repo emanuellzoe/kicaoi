@@ -22,6 +22,7 @@ export interface IsometricFarmProps {
   now: number;
   busy: boolean;
   selectedCropId: number;
+  unlockCost?: bigint;
   onSelectCrop: (id: number) => void;
   onPlant: (plotId: number) => void;
   onHarvest: (plotId: number) => void;
@@ -353,7 +354,7 @@ function countReadyPlots(plots: PlotState[], nowSec: number): number {
 }
 
 export function IsometricFarm({
-  plots, plotCount, busy, selectedCropId, onSelectCrop, onPlant, onHarvest,
+  plots, plotCount, busy, selectedCropId, unlockCost, onSelectCrop, onPlant, onHarvest,
 }: IsometricFarmProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hoverRef = useRef<{ col: number; row: number } | null>(null);
@@ -365,9 +366,11 @@ export function IsometricFarm({
   const plotsRef = useRef(plots);
   const plotCountRef = useRef(plotCount);
   const selectedRef = useRef(selectedCropId);
+  const unlockCostRef = useRef(unlockCost);
   plotsRef.current = plots;
   plotCountRef.current = plotCount;
   selectedRef.current = selectedCropId;
+  unlockCostRef.current = unlockCost;
 
   // Canvas resize
   useEffect(() => {
@@ -459,8 +462,18 @@ export function IsometricFarm({
           const { x, y } = toScreen(col, row, ox, oy);
           const isHov = hover?.col === col && hover?.row === row && active;
 
-          drawGrassTile(ctx, x, y, isHov, !active);
-          if (!active) continue;
+          const isLockedHov = !active && hover?.col === col && hover?.row === row;
+          drawGrassTile(ctx, x, y, false, !active);
+          if (!active) {
+            if (isLockedHov) {
+              const cost = unlockCostRef.current;
+              const costLabel = cost !== undefined
+                ? `Unlock for ${(Number(cost) / 1e18).toFixed(4)} CELO`
+                : "Locked plot";
+              drawTooltip(ctx, costLabel, x, y - TH / 2 - 4);
+            }
+            continue;
+          }
 
           drawSoilPatch(ctx, x, y, isHov);
 
@@ -552,8 +565,7 @@ export function IsometricFarm({
     const g = screenToGrid(e.clientX, e.clientY);
     if (!g) return;
     const { ci, ri, gc, gr } = g;
-    const plotId = ri * gc + ci;
-    if (ci >= 0 && ci < gc && ri >= 0 && ri < gr && plotId < plotCountRef.current) {
+    if (ci >= 0 && ci < gc && ri >= 0 && ri < gr) {
       hoverRef.current = { col: ci, row: ri };
     } else {
       hoverRef.current = null;
