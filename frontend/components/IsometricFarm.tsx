@@ -438,6 +438,12 @@ export function IsometricFarm({
               ctx.strokeStyle = `rgba(80,255,80,${pulse * 0.7})`; ctx.lineWidth = 2; ctx.stroke();
             }
 
+            // soft drop shadow under the crop
+            const shadowAlpha = 0.18 + prog * 0.12;
+            ctx.beginPath();
+            ctx.ellipse(x, y + 2, (TW / 2 - 10) * (0.4 + prog * 0.6), (TH / 2 - 4) * (0.3 + prog * 0.4), 0, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(0,0,0,${shadowAlpha})`;
+            ctx.fill();
             drawCrop(ctx, x, y, plot.cropId, prog, t);
 
             if (isHov && crop) {
