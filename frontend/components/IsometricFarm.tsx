@@ -14,6 +14,7 @@ const CANVAS_H = 420;
 
 interface PlotState { cropId: number; plantedAt: number; }
 interface Firefly { x: number; y: number; vx: number; vy: number; life: number; maxLife: number; size: number; }
+interface Star { x: number; y: number; size: number; twinkleOffset: number; }
 
 export interface IsometricFarmProps {
   plots: PlotState[];
@@ -356,6 +357,7 @@ export function IsometricFarm({
   const hoverRef = useRef<{ col: number; row: number } | null>(null);
   const animRef = useRef<number>(0);
   const flyRef = useRef<Firefly[]>([]);
+  const starsRef = useRef<Star[]>([]);
   const startRef = useRef(Date.now());
 
   const plotsRef = useRef(plots);
@@ -381,7 +383,18 @@ export function IsometricFarm({
     return () => ro.disconnect();
   }, []);
 
-  // Fireflies init
+  // Stars + fireflies init
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    starsRef.current = Array.from({ length: 40 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height * 0.55,
+      size: 0.5 + Math.random() * 1.2,
+      twinkleOffset: Math.random() * Math.PI * 2,
+    }));
+  }, []);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -421,6 +434,18 @@ export function IsometricFarm({
       const bg = ctx.createRadialGradient(w * 0.5, h * 0.4, 0, w * 0.5, h * 0.4, Math.max(w, h) * 0.9);
       bg.addColorStop(0, skyMid); bg.addColorStop(1, skyTop);
       ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+
+      // Stars — brighter at night, fade during day
+      const starAlpha = (1 - dayPhase) * 0.7;
+      if (starAlpha > 0.05) {
+        for (const s of starsRef.current) {
+          const twinkle = 0.5 + Math.sin(t * 0.003 + s.twinkleOffset) * 0.5;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(200,220,255,${starAlpha * twinkle})`;
+          ctx.fill();
+        }
+      }
 
       // Draw in painter's order (back to front)
       const hover = hoverRef.current;
