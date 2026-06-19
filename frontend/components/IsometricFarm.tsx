@@ -127,10 +127,13 @@ function drawSoilPatch(ctx: CanvasRenderingContext2D, x: number, y: number, hove
 
 function drawCrop(ctx: CanvasRenderingContext2D, cx: number, cy: number, cropId: number, p: number, t: number) {
   const base = cy - 2;
-  const sway = Math.sin(t * 0.0012) * Math.min(p * 5, 4);
-  if (cropId === 1) drawWheat(ctx, cx, base, p, sway, t);
-  else if (cropId === 2) drawPumpkin(ctx, cx, base, p, sway, t);
-  else if (cropId === 3) drawGolden(ctx, cx, base, p, sway, t);
+  // wind intensity varies: calm breeze punctuated by gusts (4-second cycle)
+  const windBase = Math.sin(t * 0.0012);
+  const windGust = Math.sin(t * 0.00043) * Math.sin(t * 0.00071);
+  const wind = (windBase + windGust * 0.6) * Math.min(p * 5, 4);
+  if (cropId === 1) drawWheat(ctx, cx, base, p, wind, t);
+  else if (cropId === 2) drawPumpkin(ctx, cx, base, p, wind * 0.6, t);
+  else if (cropId === 3) drawGolden(ctx, cx, base, p, wind * 0.8, t);
 }
 
 // Draws one wheat ear (the grain head) starting at the stem tip and rising
