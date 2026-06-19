@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   useAccount,
@@ -252,7 +252,15 @@ function Farm({
   };
 
   const [amount, setAmount] = useState("0.1");
-  const [selectedCropId, setSelectedCropId] = useState(1);
+  const [selectedCropId, setSelectedCropId] = useState<number>(() => {
+    if (typeof window === "undefined") return 1;
+    const saved = localStorage.getItem("kicaoi:selectedCropId");
+    return saved ? Number(saved) : 1;
+  });
+  const handleSelectCrop = useCallback((id: number) => {
+    setSelectedCropId(id);
+    if (typeof window !== "undefined") localStorage.setItem("kicaoi:selectedCropId", String(id));
+  }, []);
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
   useEffect(() => {
     const t = setInterval(() => setNow(Math.floor(Date.now() / 1000)), NOW_UPDATE_INTERVAL_MS);
@@ -351,7 +359,7 @@ function Farm({
         now={now}
         busy={busy}
         selectedCropId={selectedCropId}
-        onSelectCrop={setSelectedCropId}
+        onSelectCrop={handleSelectCrop}
         onPlant={(plotId) => send("plant", [BigInt(plotId), selectedCropId])}
         onHarvest={(plotId) => send("harvest", [BigInt(plotId)])}
       />
