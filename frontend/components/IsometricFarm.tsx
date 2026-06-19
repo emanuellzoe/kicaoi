@@ -91,11 +91,15 @@ function drawIsoBox(
   ctx.closePath(); ctx.fillStyle = right; ctx.fill();
 }
 
-function drawGrassTile(ctx: CanvasRenderingContext2D, x: number, y: number, hovered: boolean, locked: boolean) {
+function drawGrassTile(ctx: CanvasRenderingContext2D, x: number, y: number, hovered: boolean, locked: boolean, col = 0, row = 0) {
   if (locked) {
-    // Empty / not-yet-unlocked land: muted grass so the field still reads as a
-    // 3×3 plot of land rather than a void, but clearly dimmer than active tiles.
-    drawIsoBox(ctx, x, y, "#1d3b1d", "#0e220e", "#122a12");
+    // Subtle per-tile hue drift for locked plots so the field has texture
+    const drift = Math.sin((col + row) * 2.1) * 3;
+    drawIsoBox(ctx, x, y,
+      `rgb(${29+drift},${59+drift},${29+drift})`,
+      `rgb(${14},${34},${14})`,
+      `rgb(${18},${42},${18})`
+    );
     return;
   }
   const [t, l, r] = hovered
@@ -474,7 +478,7 @@ export function IsometricFarm({
           const isHov = hover?.col === col && hover?.row === row && active;
 
           const isLockedHov = !active && hover?.col === col && hover?.row === row;
-          drawGrassTile(ctx, x, y, false, !active);
+          drawGrassTile(ctx, x, y, false, !active, col, row);
           if (!active) {
             if (isLockedHov) {
               const cost = unlockCostRef.current;
