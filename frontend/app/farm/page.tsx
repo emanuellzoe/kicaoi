@@ -395,6 +395,7 @@ function Farm({
           plantedAt: plots.data?.[i] ? Number(plots.data[i].plantedAt) : 0,
         }))}
         plotCount={plotCount}
+        loading={plots.isLoading || stats.isLoading}
         busy={busy}
         selectedCropId={selectedCropId}
         unlockCost={unlockCost.data}
