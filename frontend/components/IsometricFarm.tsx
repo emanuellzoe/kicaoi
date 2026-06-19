@@ -246,7 +246,8 @@ function drawPumpkin(ctx: CanvasRenderingContext2D, cx: number, cy: number, p: n
     const lx = cx + (l - 1) * size * 0.55 + sw;
     const leafAlpha = p < 0.85 ? 1 : 1 - (p - 0.85) / 0.15;
     ctx.beginPath(); ctx.ellipse(lx, cy - 4, size * 0.4, size * 0.25, (l - 1) * 0.4, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(30,110,15,${leafAlpha})`; ctx.fill();
+    const leafR = Math.floor(20 + orange * 10), leafG = Math.floor(110 - orange * 30);
+    ctx.fillStyle = `rgba(${leafR},${leafG},15,${leafAlpha})`; ctx.fill();
   }
   const orange = Math.max(0, (p - 0.5) / 0.5);
   const rr = Math.floor(30 + orange * 225), gg = Math.floor(120 - orange * 80);
