@@ -330,7 +330,7 @@ function drawGolden(ctx: CanvasRenderingContext2D, cx: number, cy: number, p: nu
 // ─── Tooltip ──────────────────────────────────────────────────────────────────
 
 function drawTooltip(ctx: CanvasRenderingContext2D, text: string, x: number, y: number) {
-  ctx.font = "11px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, sans-serif";
   const tw = ctx.measureText(text).width;
   const pad = 8, r = 5, bx = x - tw / 2 - pad, by = y - 28, bw = tw + pad * 2, bh = 20;
   ctx.beginPath();
@@ -339,8 +339,9 @@ function drawTooltip(ctx: CanvasRenderingContext2D, text: string, x: number, y: 
   ctx.arcTo(bx + bw, by + bh, bx + bw - r, by + bh, r); ctx.lineTo(bx + r, by + bh);
   ctx.arcTo(bx, by + bh, bx, by + bh - r, r); ctx.lineTo(bx, by + r);
   ctx.arcTo(bx, by, bx + r, by, r); ctx.closePath();
-  ctx.fillStyle = "rgba(0,0,0,0.8)"; ctx.fill();
-  ctx.fillStyle = "rgba(255,255,255,0.92)"; ctx.textAlign = "center";
+  ctx.fillStyle = "rgba(10,20,10,0.88)"; ctx.fill();
+  ctx.strokeStyle = "rgba(80,200,80,0.25)"; ctx.lineWidth = 1; ctx.stroke();
+  ctx.fillStyle = "rgba(255,255,255,0.95)"; ctx.textAlign = "center";
   ctx.fillText(text, x, by + 13.5); ctx.textAlign = "left";
 }
 
