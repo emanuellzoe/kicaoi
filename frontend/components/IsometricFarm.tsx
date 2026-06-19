@@ -9,6 +9,7 @@ const TW = 96;
 const TH = 48;
 const TD = 18;
 const CANVAS_H = 420;
+const TOOLTIP_FADE_FRAMES = 8;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
