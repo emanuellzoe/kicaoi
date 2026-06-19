@@ -7,9 +7,10 @@ interface PlotEntry { cropId: number; plantedAt: number; }
 interface GrowthTimelineProps {
   plots: PlotEntry[];
   now: number;
+  emptyCount?: number;
 }
 
-export function GrowthTimeline({ plots, now }: GrowthTimelineProps) {
+export function GrowthTimeline({ plots, now, emptyCount = 0 }: GrowthTimelineProps) {
   const growing = plots
     .map((p, i) => ({ ...p, id: i }))
     .filter((p) => p.cropId !== 0 && p.plantedAt !== 0)
@@ -25,11 +26,16 @@ export function GrowthTimeline({ plots, now }: GrowthTimelineProps) {
     .sort((a, b) => a!.secsLeft - b!.secsLeft)
     .slice(0, 5);
 
-  if (growing.length === 0) return null;
+  if (growing.length === 0 && emptyCount === 0) return null;
 
   return (
     <div className="liquid-glass rounded-2xl p-4">
-      <div className="text-xs text-white/40 font-body mb-3 uppercase tracking-wider">Next harvests</div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-xs text-white/40 font-body uppercase tracking-wider">Next harvests</div>
+        {emptyCount > 0 && (
+          <div className="text-xs text-white/30 font-body">{emptyCount} empty plot{emptyCount !== 1 ? "s" : ""}</div>
+        )}
+      </div>
       <div className="flex flex-col gap-2">
         {growing.map((g) => {
           if (!g) return null;

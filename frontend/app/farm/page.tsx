@@ -412,6 +412,7 @@ function Farm({
             plantedAt: plots.data?.[i] ? Number(plots.data[i].plantedAt) : 0,
           }))}
           now={now}
+          emptyCount={emptyPlotIds.length}
         />
       )}
 
