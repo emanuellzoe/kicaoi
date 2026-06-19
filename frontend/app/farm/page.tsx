@@ -27,6 +27,7 @@ import { formatCountdown, formatHarvestTime } from "@/lib/time";
 import { ZERO_ADDRESS, SEED_PER_CELO, PLOTS_POLL_INTERVAL_MS } from "@/lib/constants";
 import { IsometricFarm } from "@/components/IsometricFarm";
 import { FarmStats } from "@/components/FarmStats";
+import { CropInfoPanel } from "@/components/CropInfoPanel";
 
 const ZERO = ZERO_ADDRESS;
 const SEED_RATE = SEED_PER_CELO;
@@ -372,6 +373,9 @@ function Farm({
           seedBalance={seedBal}
         />
       )}
+
+      {/* Crop info for selected crop */}
+      <CropInfoPanel selectedCropId={selectedCropId} seedBalance={seedBal} />
 
       {/* Isometric Farm View */}
       <IsometricFarm
