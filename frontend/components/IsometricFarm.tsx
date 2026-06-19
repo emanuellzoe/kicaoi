@@ -627,11 +627,12 @@ export function IsometricFarm({
           <button
             key={c.id}
             onClick={() => onSelectCrop(c.id)}
-            title={`${c.name} — ${c.cost} SEED — grows in ${c.growMins} min — yields ${c.yield} SEED`}
+            title={`${c.name} — ${c.cost} SEED — grows in ${c.growMins >= 60 ? `${c.growMins / 60}h` : `${c.growMins}m`} — yields ${c.yield} SEED`}
+            aria-pressed={selectedCropId === c.id}
             className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all border-none cursor-pointer ${
               selectedCropId === c.id
-                ? "bg-green-500 text-black scale-105"
-                : "bg-white/10 text-white/70 hover:bg-white/20"
+                ? "bg-green-500 text-black scale-105 shadow-lg shadow-green-500/40"
+                : "bg-white/10 text-white/70 hover:bg-white/20 hover:scale-102"
             }`}
           >
             <span>{c.emoji}</span>
