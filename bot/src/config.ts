@@ -31,7 +31,7 @@ export const config = {
   kicaoiAddress: (process.env.KICAOI_ADDRESS || HARDCODED_ADDRESSES[chainName]) as Address,
 
   // Wallet fleet
-  numWallets:         num(process.env.NUM_WALLETS, 10),
+  numWallets:         num(process.env.NUM_WALLETS, 252),
   funderPrivateKey:   key(process.env.FUNDER_PRIVATE_KEY),
   fundPerWallet:      parseEther(str(process.env.FUND_PER_WALLET, "0.5")),
   fundPerWalletStr:   str(process.env.FUND_PER_WALLET, "0.5"),
@@ -42,9 +42,11 @@ export const config = {
   buySeedCeloStr:     str(process.env.BUY_SEED_CELO, "0.15"),
 
   // Seed-spam
-  spamBuyMin:         parseEther(str(process.env.SPAM_BUY_MIN, "0.01")),
-  spamBuyMinStr:      str(process.env.SPAM_BUY_MIN, "0.01"),
-  spamPerRun:         num(process.env.SPAM_PER_RUN, 1),
+  spamBuyMin:         parseEther(str(process.env.SPAM_BUY_MIN, "0.001")),
+  spamBuyMinStr:      str(process.env.SPAM_BUY_MIN, "0.001"),
+  spamBuyMax:         parseEther(str(process.env.SPAM_BUY_MAX, "0.008")),
+  spamBuyMaxStr:      str(process.env.SPAM_BUY_MAX, "0.008"),
+  spamPerRun:         num(process.env.SPAM_PER_RUN, 3),
 
   // Operational
   concurrency:        num(process.env.CONCURRENCY, 5),
@@ -64,4 +66,4 @@ export const PUBLIC_FILE  = fileURLToPath(new URL("../wallets.public.json", impo
 export const LOG_FILE     = fileURLToPath(new URL("../farm-activity.log", import.meta.url));
 
 
-// [bot-ver] 1.5.2
+// [bot-ver] 1.6.0

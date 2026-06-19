@@ -5,22 +5,27 @@ import { cropById, CROPS } from "@/lib/contract";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const TW = 96;
-const TH = 48;
-const TD = 18;
+const TW = 96;   // tile width (iso diamond)
+const TH = 48;   // tile height (iso diamond)
+const TD = 18;   // tile depth (3D extrusion)
 const CANVAS_H = 420;
+const TOOLTIP_FADE_FRAMES = 8;
+const DAY_CYCLE_HZ = 0.000052;  // full day/night cycle ~120 seconds
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface PlotState { cropId: number; plantedAt: number; }
 interface Firefly { x: number; y: number; vx: number; vy: number; life: number; maxLife: number; size: number; }
+interface Star { x: number; y: number; size: number; twinkleOffset: number; }
+interface Sparkle { x: number; y: number; vx: number; vy: number; life: number; maxLife: number; color: string; }
 
 export interface IsometricFarmProps {
   plots: PlotState[];
   plotCount: number;
-  now: number;
+  loading?: boolean;
   busy: boolean;
   selectedCropId: number;
+  unlockCost?: bigint;
   onSelectCrop: (id: number) => void;
   onPlant: (plotId: number) => void;
   onHarvest: (plotId: number) => void;
@@ -33,6 +38,8 @@ export interface IsometricFarmProps {
 // farm reads as a proper field rather than a lonely row.
 const GRID_COLS = 3;
 const MIN_GRID_ROWS = 3;
+const FIREFLY_COUNT = 14;
+const STAR_COUNT = 40;
 
 function gridLayout(n: number) {
   const cols = GRID_COLS;
@@ -85,11 +92,15 @@ function drawIsoBox(
   ctx.closePath(); ctx.fillStyle = right; ctx.fill();
 }
 
-function drawGrassTile(ctx: CanvasRenderingContext2D, x: number, y: number, hovered: boolean, locked: boolean) {
+function drawGrassTile(ctx: CanvasRenderingContext2D, x: number, y: number, hovered: boolean, locked: boolean, col = 0, row = 0) {
   if (locked) {
-    // Empty / not-yet-unlocked land: muted grass so the field still reads as a
-    // 3×3 plot of land rather than a void, but clearly dimmer than active tiles.
-    drawIsoBox(ctx, x, y, "#1d3b1d", "#0e220e", "#122a12");
+    // Subtle per-tile hue drift for locked plots so the field has texture
+    const drift = Math.sin((col + row) * 2.1) * 3;
+    drawIsoBox(ctx, x, y,
+      `rgb(${29+drift},${59+drift},${29+drift})`,
+      `rgb(${14},${34},${14})`,
+      `rgb(${18},${42},${18})`
+    );
     return;
   }
   const [t, l, r] = hovered
@@ -98,16 +109,18 @@ function drawGrassTile(ctx: CanvasRenderingContext2D, x: number, y: number, hove
   drawIsoBox(ctx, x, y, t, l, r);
 }
 
-function drawSoilPatch(ctx: CanvasRenderingContext2D, x: number, y: number, hovered: boolean) {
+function drawSoilPatch(ctx: CanvasRenderingContext2D, x: number, y: number, hovered: boolean, plotId = 0) {
   const hw = TW / 2 - 9, hh = TH / 2 - 5;
   ctx.beginPath();
   ctx.moveTo(x, y - hh); ctx.lineTo(x + hw, y);
   ctx.lineTo(x, y + hh); ctx.lineTo(x - hw, y);
   ctx.closePath();
+  // subtle per-plot hue variation: ±4 on green channel
+  const tint = Math.floor(Math.sin(plotId * 4.71) * 4);
   const grad = ctx.createLinearGradient(x - hw, y - hh, x + hw, y + hh);
-  grad.addColorStop(0, hovered ? "#8a6040" : "#7a5432");
-  grad.addColorStop(0.5, hovered ? "#7a5535" : "#6a4928");
-  grad.addColorStop(1, hovered ? "#6a4a2a" : "#5a3e22");
+  grad.addColorStop(0, hovered ? `rgb(138,${96+tint},64)` : `rgb(122,${84+tint},50)`);
+  grad.addColorStop(0.5, hovered ? `rgb(122,${85+tint},53)` : `rgb(106,${73+tint},40)`);
+  grad.addColorStop(1, hovered ? `rgb(106,${74+tint},42)` : `rgb(90,${62+tint},34)`);
   ctx.fillStyle = grad; ctx.fill();
 
   ctx.strokeStyle = "rgba(0,0,0,0.18)"; ctx.lineWidth = 1;
@@ -122,10 +135,13 @@ function drawSoilPatch(ctx: CanvasRenderingContext2D, x: number, y: number, hove
 
 function drawCrop(ctx: CanvasRenderingContext2D, cx: number, cy: number, cropId: number, p: number, t: number) {
   const base = cy - 2;
-  const sway = Math.sin(t * 0.0012) * Math.min(p * 5, 4);
-  if (cropId === 1) drawWheat(ctx, cx, base, p, sway, t);
-  else if (cropId === 2) drawPumpkin(ctx, cx, base, p, sway, t);
-  else if (cropId === 3) drawGolden(ctx, cx, base, p, sway, t);
+  // wind intensity varies: calm breeze punctuated by gusts (4-second cycle)
+  const windBase = Math.sin(t * 0.0012);
+  const windGust = Math.sin(t * 0.00043) * Math.sin(t * 0.00071);
+  const wind = (windBase + windGust * 0.6) * Math.min(p * 5, 4);
+  if (cropId === 1) drawWheat(ctx, cx, base, p, wind, t);
+  else if (cropId === 2) drawPumpkin(ctx, cx, base, p, wind * 0.6, t);
+  else if (cropId === 3) drawGolden(ctx, cx, base, p, wind * 0.8, t);
 }
 
 // Draws one wheat ear (the grain head) starting at the stem tip and rising
@@ -241,7 +257,8 @@ function drawPumpkin(ctx: CanvasRenderingContext2D, cx: number, cy: number, p: n
     const lx = cx + (l - 1) * size * 0.55 + sw;
     const leafAlpha = p < 0.85 ? 1 : 1 - (p - 0.85) / 0.15;
     ctx.beginPath(); ctx.ellipse(lx, cy - 4, size * 0.4, size * 0.25, (l - 1) * 0.4, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(30,110,15,${leafAlpha})`; ctx.fill();
+    const leafR = Math.floor(20 + orange * 10), leafG = Math.floor(110 - orange * 30);
+    ctx.fillStyle = `rgba(${leafR},${leafG},15,${leafAlpha})`; ctx.fill();
   }
   const orange = Math.max(0, (p - 0.5) / 0.5);
   const rr = Math.floor(30 + orange * 225), gg = Math.floor(120 - orange * 80);
@@ -305,14 +322,21 @@ function drawGolden(ctx: CanvasRenderingContext2D, cx: number, cy: number, p: nu
   if (p > 0.4) {
     const hp = (p - 0.4) / 0.6;
     const pColor = `rgb(${Math.floor(220 + hp * 35)},${Math.floor(170 + hp * 30)},20)`;
-    for (let pp = 0; pp < 6; pp++) {
-      const angle = (pp / 6) * Math.PI * 2 + t * 0.001;
+    const petalCount = hp > 0.7 ? 8 : 6;
+    for (let pp = 0; pp < petalCount; pp++) {
+      const angle = (pp / petalCount) * Math.PI * 2 + t * 0.001;
+      const petalLen = 4 + hp * 11;
       ctx.beginPath(); ctx.moveTo(tipX, tipY);
-      ctx.lineTo(tipX + Math.cos(angle) * (4 + hp * 9), tipY + Math.sin(angle) * (4 + hp * 9) * 0.6);
-      ctx.strokeStyle = pColor; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.quadraticCurveTo(
+        tipX + Math.cos(angle + 0.3) * petalLen * 0.6,
+        tipY + Math.sin(angle + 0.3) * petalLen * 0.6 * 0.6,
+        tipX + Math.cos(angle) * petalLen,
+        tipY + Math.sin(angle) * petalLen * 0.6
+      );
+      ctx.strokeStyle = pColor; ctx.lineWidth = hp > 0.7 ? 3 : 2.5; ctx.stroke();
     }
-    ctx.beginPath(); ctx.arc(tipX, tipY, 3 + hp * 3, 0, Math.PI * 2);
-    ctx.fillStyle = pColor; ctx.fill();
+    ctx.beginPath(); ctx.arc(tipX, tipY, 3 + hp * 4, 0, Math.PI * 2);
+    ctx.fillStyle = `rgb(${Math.floor(100 + hp * 50)},${Math.floor(60 + hp * 20)},10)`; ctx.fill();
   }
   if (p >= 0.95) {
     const alpha = 0.28 + Math.sin(t * 0.004) * 0.18;
@@ -325,7 +349,7 @@ function drawGolden(ctx: CanvasRenderingContext2D, cx: number, cy: number, p: nu
 // ─── Tooltip ──────────────────────────────────────────────────────────────────
 
 function drawTooltip(ctx: CanvasRenderingContext2D, text: string, x: number, y: number) {
-  ctx.font = "11px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, sans-serif";
   const tw = ctx.measureText(text).width;
   const pad = 8, r = 5, bx = x - tw / 2 - pad, by = y - 28, bw = tw + pad * 2, bh = 20;
   ctx.beginPath();
@@ -334,28 +358,42 @@ function drawTooltip(ctx: CanvasRenderingContext2D, text: string, x: number, y: 
   ctx.arcTo(bx + bw, by + bh, bx + bw - r, by + bh, r); ctx.lineTo(bx + r, by + bh);
   ctx.arcTo(bx, by + bh, bx, by + bh - r, r); ctx.lineTo(bx, by + r);
   ctx.arcTo(bx, by, bx + r, by, r); ctx.closePath();
-  ctx.fillStyle = "rgba(0,0,0,0.8)"; ctx.fill();
-  ctx.fillStyle = "rgba(255,255,255,0.92)"; ctx.textAlign = "center";
+  ctx.fillStyle = "rgba(10,20,10,0.88)"; ctx.fill();
+  ctx.strokeStyle = "rgba(80,200,80,0.25)"; ctx.lineWidth = 1; ctx.stroke();
+  ctx.fillStyle = "rgba(255,255,255,0.95)"; ctx.textAlign = "center";
   ctx.fillText(text, x, by + 13.5); ctx.textAlign = "left";
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+function countReadyPlots(plots: PlotState[], nowSec: number): number {
+  return plots.filter((p) => {
+    if (!p || p.cropId === 0 || p.plantedAt === 0) return false;
+    const crop = cropById(p.cropId);
+    return crop ? nowSec >= p.plantedAt + crop.growMins * 60 : false;
+  }).length;
+}
+
 export function IsometricFarm({
-  plots, plotCount, busy, selectedCropId, onSelectCrop, onPlant, onHarvest,
+  plots, plotCount, loading = false, busy, selectedCropId, unlockCost,
+  onSelectCrop, onPlant, onHarvest,
 }: IsometricFarmProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hoverRef = useRef<{ col: number; row: number } | null>(null);
   const animRef = useRef<number>(0);
   const flyRef = useRef<Firefly[]>([]);
+  const starsRef = useRef<Star[]>([]);
+  const sparklesRef = useRef<Sparkle[]>([]);
   const startRef = useRef(Date.now());
 
   const plotsRef = useRef(plots);
   const plotCountRef = useRef(plotCount);
   const selectedRef = useRef(selectedCropId);
+  const unlockCostRef = useRef(unlockCost);
   plotsRef.current = plots;
   plotCountRef.current = plotCount;
   selectedRef.current = selectedCropId;
+  unlockCostRef.current = unlockCost;
 
   // Canvas resize
   useEffect(() => {
@@ -373,11 +411,22 @@ export function IsometricFarm({
     return () => ro.disconnect();
   }, []);
 
-  // Fireflies init
+  // Stars + fireflies init
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    flyRef.current = Array.from({ length: 14 }, () => ({
+    starsRef.current = Array.from({ length: STAR_COUNT }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height * 0.55,
+      size: 0.5 + Math.random() * 1.2,
+      twinkleOffset: Math.random() * Math.PI * 2,
+    }));
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    flyRef.current = Array.from({ length: FIREFLY_COUNT }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height * 0.8 + canvas.height * 0.1,
       vx: (Math.random() - 0.5) * 0.5,
@@ -406,10 +455,25 @@ export function IsometricFarm({
 
       ctx.clearRect(0, 0, w, h);
 
-      // Background
+      // Background — slow day/night cycle (full cycle ~120 seconds)
+      const dayPhase = (Math.sin(t * DAY_CYCLE_HZ) + 1) / 2; // 0=night, 1=day
+      const skyTop = `rgb(${Math.floor(4 + dayPhase * 8)},${Math.floor(8 + dayPhase * 22)},${Math.floor(4 + dayPhase * 14)})`;
+      const skyMid = `rgb(${Math.floor(13 + dayPhase * 12)},${Math.floor(32 + dayPhase * 28)},${Math.floor(13 + dayPhase * 14)})`;
       const bg = ctx.createRadialGradient(w * 0.5, h * 0.4, 0, w * 0.5, h * 0.4, Math.max(w, h) * 0.9);
-      bg.addColorStop(0, "#0d200d"); bg.addColorStop(1, "#040804");
+      bg.addColorStop(0, skyMid); bg.addColorStop(1, skyTop);
       ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+
+      // Stars — brighter at night, fade during day
+      const starAlpha = (1 - dayPhase) * 0.7;
+      if (starAlpha > 0.05) {
+        for (const s of starsRef.current) {
+          const twinkle = 0.5 + Math.sin(t * 0.003 + s.twinkleOffset) * 0.5;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(200,220,255,${starAlpha * twinkle})`;
+          ctx.fill();
+        }
+      }
 
       // Draw in painter's order (back to front)
       const hover = hoverRef.current;
@@ -421,10 +485,20 @@ export function IsometricFarm({
           const { x, y } = toScreen(col, row, ox, oy);
           const isHov = hover?.col === col && hover?.row === row && active;
 
-          drawGrassTile(ctx, x, y, isHov, !active);
-          if (!active) continue;
+          const isLockedHov = !active && hover?.col === col && hover?.row === row;
+          drawGrassTile(ctx, x, y, false, !active, col, row);
+          if (!active) {
+            if (isLockedHov) {
+              const cost = unlockCostRef.current;
+              const costLabel = cost !== undefined
+                ? `Unlock for ${(Number(cost) / 1e18).toFixed(4)} CELO`
+                : "Locked plot";
+              drawTooltip(ctx, costLabel, x, y - TH / 2 - 4);
+            }
+            continue;
+          }
 
-          drawSoilPatch(ctx, x, y, isHov);
+          drawSoilPatch(ctx, x, y, isHov, plotId);
 
           if (plot && plot.cropId !== 0) {
             const prog = growthProgress(plot.cropId, plot.plantedAt, nowSec);
@@ -438,10 +512,24 @@ export function IsometricFarm({
               ctx.strokeStyle = `rgba(80,255,80,${pulse * 0.7})`; ctx.lineWidth = 2; ctx.stroke();
             }
 
+            // soft drop shadow under the crop
+            const shadowAlpha = 0.18 + prog * 0.12;
+            ctx.beginPath();
+            ctx.ellipse(x, y + 2, (TW / 2 - 10) * (0.4 + prog * 0.6), (TH / 2 - 4) * (0.3 + prog * 0.4), 0, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(0,0,0,${shadowAlpha})`;
+            ctx.fill();
             drawCrop(ctx, x, y, plot.cropId, prog, t);
 
             if (isHov && crop) {
-              const label = isReady ? `✓ Harvest ${crop.name}` : `${crop.name} ${Math.round(prog * 100)}%`;
+              let label: string;
+              if (isReady) {
+                label = `✓ Harvest ${crop.name} (+${crop.yield} SEED)`;
+              } else {
+                const secsLeft = Math.max(0, (plot.plantedAt + crop.growMins * 60) - nowSec);
+                const mLeft = Math.ceil(secsLeft / 60);
+                const timeStr = mLeft >= 60 ? `${Math.floor(mLeft / 60)}h ${mLeft % 60}m` : `${mLeft}m`;
+                label = `${crop.name} ${Math.round(prog * 100)}% · ${timeStr} left`;
+              }
               drawTooltip(ctx, label, x, y - TH / 2);
             }
           } else if (isHov && active) {
@@ -450,7 +538,7 @@ export function IsometricFarm({
               ctx.globalAlpha = 0.35;
               drawCrop(ctx, x, y, sel, 0.08, t);
               ctx.globalAlpha = 1;
-              drawTooltip(ctx, `Plant ${selCrop.name} (${selCrop.cost} SEED)`, x, y - TH / 2);
+              drawTooltip(ctx, `Plot #${plotId} · Plant ${selCrop.name} (${selCrop.cost} SEED)`, x, y - TH / 2);
             }
           }
         }
@@ -465,11 +553,23 @@ export function IsometricFarm({
           f.x = Math.random() * w; f.y = Math.random() * h * 0.7 + h * 0.1;
           f.vx = (Math.random() - 0.5) * 0.5; f.vy = (Math.random() - 0.5) * 0.3;
           f.life = 0; f.maxLife = 160 + Math.random() * 140;
+          f.size = 1.2 + Math.random() * 1.8;
         }
         const phase = f.life / f.maxLife;
         const alpha = Math.sin(phase * Math.PI) * (0.5 + Math.sin(t * 0.006 + f.x * 0.1) * 0.3);
+        const warm = (f.x + f.y) % 60 < 30;
+        const ffColor = warm ? `rgba(190,240,100,${alpha})` : `rgba(160,220,255,${alpha * 0.7})`;
         ctx.beginPath(); ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(190,240,100,${alpha})`; ctx.fill();
+        ctx.fillStyle = ffColor; ctx.fill();
+      }
+
+      // Sparkles (harvest / plant burst)
+      sparklesRef.current = sparklesRef.current.filter((s) => s.life < s.maxLife);
+      for (const s of sparklesRef.current) {
+        s.x += s.vx; s.y += s.vy; s.vy += 0.12; s.vx *= 0.95; s.life++;
+        const a = 1 - s.life / s.maxLife;
+        ctx.beginPath(); ctx.arc(s.x, s.y, 2.5 * a + 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = s.color.replace(",1)", `,${a})`); ctx.fill();
       }
 
       animRef.current = requestAnimationFrame(frame);
@@ -497,8 +597,7 @@ export function IsometricFarm({
     const g = screenToGrid(e.clientX, e.clientY);
     if (!g) return;
     const { ci, ri, gc, gr } = g;
-    const plotId = ri * gc + ci;
-    if (ci >= 0 && ci < gc && ri >= 0 && ri < gr && plotId < plotCountRef.current) {
+    if (ci >= 0 && ci < gc && ri >= 0 && ri < gr) {
       hoverRef.current = { col: ci, row: ri };
     } else {
       hoverRef.current = null;
@@ -507,9 +606,62 @@ export function IsometricFarm({
 
   const handleLeave = useCallback(() => { hoverRef.current = null; }, []);
 
+  const emitSparkles = useCallback((clientX: number, clientY: number, colors: string[]) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const sx = (clientX - rect.left) * (canvas.width / rect.width);
+    const sy = (clientY - rect.top) * (canvas.height / rect.height);
+    for (let i = 0; i < 18; i++) {
+      const angle = (i / 18) * Math.PI * 2 + Math.random() * 0.4;
+      const speed = 1.5 + Math.random() * 2.5;
+      sparklesRef.current.push({
+        x: sx, y: sy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1.5,
+        life: 0, maxLife: 35 + Math.random() * 25,
+        color: colors[i % colors.length],
+      });
+    }
+  }, []);
+
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (busy) return;
     const g = screenToGrid(e.clientX, e.clientY);
+    if (!g) return;
+    const { ci, ri, gc } = g;
+    const plotId = ri * gc + ci;
+    if (plotId < 0 || plotId >= plotCountRef.current) return;
+    const plot = plotsRef.current[plotId];
+    if (!plot || plot.cropId === 0) {
+      onPlant(plotId);
+      emitSparkles(e.clientX, e.clientY, ["rgba(80,220,80,1)", "rgba(120,255,120,1)", "rgba(200,255,100,1)"]);
+    } else {
+      const crop = cropById(plot.cropId);
+      if (crop && Date.now() / 1000 >= plot.plantedAt + crop.growMins * 60) {
+        onHarvest(plotId);
+        emitSparkles(e.clientX, e.clientY, ["rgba(255,210,30,1)", "rgba(255,160,20,1)", "rgba(255,255,100,1)"]);
+      }
+    }
+  }, [busy, onPlant, onHarvest, screenToGrid, emitSparkles]);
+
+  const handleTouch = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (busy || e.touches.length !== 1) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const g = screenToGrid(touch.clientX, touch.clientY);
+    if (!g) return;
+    const { ci, ri, gc, gr } = g;
+    if (ci >= 0 && ci < gc && ri >= 0 && ri < gr) {
+      hoverRef.current = { col: ci, row: ri };
+    }
+  }, [busy, screenToGrid]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (busy) return;
+    e.preventDefault();
+    const touch = e.changedTouches[0];
+    const g = screenToGrid(touch.clientX, touch.clientY);
     if (!g) return;
     const { ci, ri, gc } = g;
     const plotId = ri * gc + ci;
@@ -523,17 +675,27 @@ export function IsometricFarm({
         onHarvest(plotId);
       }
     }
+    hoverRef.current = null;
   }, [busy, onPlant, onHarvest, screenToGrid]);
 
   return (
-    <div className="relative rounded-2xl overflow-hidden border border-white/10">
+    <div
+      className="relative rounded-2xl overflow-hidden border border-white/10"
+      style={{ animation: "farmFadeIn 0.6s ease-out" }}
+    >
+      <style>{`@keyframes farmFadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }`}</style>
       <canvas
         ref={canvasRef}
-        className="w-full block touch-none"
-        style={{ height: CANVAS_H, cursor: busy ? "wait" : "pointer" }}
+        role="img"
+        aria-label={`Isometric farm view with ${plotCount} plot${plotCount !== 1 ? "s" : ""}. Click a plot to plant or harvest.`}
+        className="w-full block"
+        style={{ height: CANVAS_H, cursor: busy ? "wait" : "pointer", touchAction: "none" }}
         onMouseMove={handleMove}
         onMouseLeave={handleLeave}
         onClick={handleClick}
+        onTouchStart={handleTouch}
+        onTouchMove={handleTouch}
+        onTouchEnd={handleTouchEnd}
       />
       {/* Crop selector overlay */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 bg-black/70 backdrop-blur-md rounded-full px-3 py-2 border border-white/10">
@@ -541,11 +703,12 @@ export function IsometricFarm({
           <button
             key={c.id}
             onClick={() => onSelectCrop(c.id)}
-            title={`${c.name} — ${c.cost} SEED — grows in ${c.growMins} min — yields ${c.yield} SEED`}
+            title={`${c.name} — ${c.cost} SEED — grows in ${c.growMins >= 60 ? `${c.growMins / 60}h` : `${c.growMins}m`} — yields ${c.yield} SEED`}
+            aria-pressed={selectedCropId === c.id}
             className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all border-none cursor-pointer ${
               selectedCropId === c.id
-                ? "bg-green-500 text-black scale-105"
-                : "bg-white/10 text-white/70 hover:bg-white/20"
+                ? "bg-green-500 text-black scale-105 shadow-lg shadow-green-500/40"
+                : "bg-white/10 text-white/70 hover:bg-white/20 hover:scale-102"
             }`}
           >
             <span>{c.emoji}</span>
@@ -554,10 +717,21 @@ export function IsometricFarm({
           </button>
         ))}
       </div>
-      {/* Plot count */}
-      <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/50 border border-white/10 font-body">
+      {/* Plot count / loading indicator */}
+      <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/50 border border-white/10 font-body flex items-center gap-1.5">
+        {loading && <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />}
         {plotCount} plot{plotCount !== 1 ? "s" : ""}
       </div>
+      {/* Harvest-ready badge */}
+      {(() => {
+        const ready = countReadyPlots(plots, Date.now() / 1000);
+        return ready > 0 ? (
+          <div className="absolute top-3 right-3 bg-green-500 text-black rounded-full px-2.5 py-1 text-xs font-bold flex items-center gap-1 shadow-lg shadow-green-500/30 animate-pulse">
+            <span>✓</span>
+            <span>{ready} ready</span>
+          </div>
+        ) : null;
+      })()}
     </div>
   );
 }

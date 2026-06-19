@@ -1,14 +1,21 @@
-﻿name: KICAOI Farm Bot
+name: KICAOI Seed Spam
 
 on:
-  schedule:
-    - cron: '*/6 * * * *'   # Setiap 6 menit (wheat grow = 5 menit)
-  workflow_dispatch:          # Bisa trigger manual dari GitHub UI
+  workflow_dispatch:
+    inputs:
+      num_wallets:
+        description: 'Number of wallets to use'
+        required: false
+        default: '252'
+      spam_per_run:
+        description: 'TX per wallet per run'
+        required: false
+        default: '3'
 
 jobs:
-  farm:
+  seed-spam:
     runs-on: ubuntu-latest
-    timeout-minutes: 5        # Kill jika lebih dari 5 menit (sebelum run berikutnya)
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -24,17 +31,14 @@ jobs:
       - name: Install dependencies
         run: cd bot && npm ci --prefer-offline 2>/dev/null || npm install
 
-      - name: Run Farm
+      - name: Run Seed Spam
         env:
           CHAIN: celo
           RPC_URL: ${{ secrets.RPC_URL }}
           KICAOI_WALLETS: ${{ secrets.KICAOI_WALLETS }}
-          NUM_WALLETS: "252"
-          CROP_ID: "1"
-          BUY_SEED_CELO: "0.15"
+          NUM_WALLETS: ${{ github.event.inputs.num_wallets }}
+          SPAM_PER_RUN: ${{ github.event.inputs.spam_per_run }}
+          SPAM_BUY_MIN: "0.001"
           CONCURRENCY: "20"
           MIN_GAS_RESERVE: "0.005"
-        run: cd bot && npx tsx src/farm.ts
-
-
-# [wf-v] 8
+        run: cd bot && npx tsx src/seed-spam.ts

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   useAccount,
@@ -26,6 +26,9 @@ import { GrowthBar } from "@/components/GrowthBar";
 import { formatCountdown, formatHarvestTime } from "@/lib/time";
 import { ZERO_ADDRESS, SEED_PER_CELO, PLOTS_POLL_INTERVAL_MS } from "@/lib/constants";
 import { IsometricFarm } from "@/components/IsometricFarm";
+import { FarmStats } from "@/components/FarmStats";
+import { CropInfoPanel } from "@/components/CropInfoPanel";
+import { GrowthTimeline } from "@/components/GrowthTimeline";
 
 const ZERO = ZERO_ADDRESS;
 const SEED_RATE = SEED_PER_CELO;
@@ -66,9 +69,11 @@ export default function FarmPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/leaderboard"
-              className="liquid-glass rounded-full px-3 py-1.5 text-xs font-medium text-white/80 hover:text-white transition-colors no-underline"
+              className="liquid-glass rounded-full px-3 py-1.5 text-xs font-medium text-white/80 hover:text-white transition-colors no-underline flex items-center gap-1"
+              title="View leaderboard"
             >
-              🏆 Board
+              <span>🏆</span>
+              <span className="hidden sm:inline">Board</span>
             </Link>
             {isConnected && !isMiniPay && (
               <button
@@ -252,7 +257,15 @@ function Farm({
   };
 
   const [amount, setAmount] = useState("0.1");
-  const [selectedCropId, setSelectedCropId] = useState(1);
+  const [selectedCropId, setSelectedCropId] = useState<number>(() => {
+    if (typeof window === "undefined") return 1;
+    const saved = localStorage.getItem("kicaoi:selectedCropId");
+    return saved ? Number(saved) : 1;
+  });
+  const handleSelectCrop = useCallback((id: number) => {
+    setSelectedCropId(id);
+    if (typeof window !== "undefined") localStorage.setItem("kicaoi:selectedCropId", String(id));
+  }, []);
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
   useEffect(() => {
     const t = setInterval(() => setNow(Math.floor(Date.now() / 1000)), NOW_UPDATE_INTERVAL_MS);
@@ -270,6 +283,28 @@ function Farm({
     }
     return ids;
   }, [plots.data, plotCount, now]);
+
+  const emptyPlotIds = useMemo(() => {
+    if (!plots.data) return [] as number[];
+    const ids: number[] = [];
+    for (let i = 0; i < plotCount; i++) {
+      const p = plots.data[i];
+      if (!p || p.cropId === 0) ids.push(i);
+    }
+    return ids;
+  }, [plots.data, plotCount]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "h" || e.key === "H") {
+        if (!busy && readyPlotIds.length > 0) send("batchHarvest", [readyPlotIds]);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [busy, readyPlotIds]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -341,6 +376,20 @@ function Farm({
         )}
       </div>
 
+      {/* Farm Stats */}
+      {stats.data && (
+        <FarmStats
+          plotCount={plotCount}
+          totalPlanted={Number(stats.data.totalPlanted)}
+          totalHarvested={Number(stats.data.totalHarvested)}
+          totalSeedHarvested={Number(stats.data.totalSeedHarvested)}
+          seedBalance={seedBal}
+        />
+      )}
+
+      {/* Crop info for selected crop */}
+      <CropInfoPanel selectedCropId={selectedCropId} seedBalance={seedBal} />
+
       {/* Isometric Farm View */}
       <IsometricFarm
         plots={Array.from({ length: plotCount }, (_, i) => ({
@@ -348,27 +397,42 @@ function Farm({
           plantedAt: plots.data?.[i] ? Number(plots.data[i].plantedAt) : 0,
         }))}
         plotCount={plotCount}
-        now={now}
+        loading={plots.isLoading || stats.isLoading}
         busy={busy}
         selectedCropId={selectedCropId}
-        onSelectCrop={setSelectedCropId}
+        unlockCost={unlockCost.data}
+        onSelectCrop={handleSelectCrop}
         onPlant={(plotId) => send("plant", [BigInt(plotId), selectedCropId])}
         onHarvest={(plotId) => send("harvest", [BigInt(plotId)])}
       />
+
+      {/* Growth Timeline */}
+      {plots.data && plotCount > 0 && (
+        <GrowthTimeline
+          plots={Array.from({ length: plotCount }, (_, i) => ({
+            cropId: plots.data?.[i] ? Number(plots.data[i].cropId) : 0,
+            plantedAt: plots.data?.[i] ? Number(plots.data[i].plantedAt) : 0,
+          }))}
+          now={now}
+          emptyCount={emptyPlotIds.length}
+        />
+      )}
 
       {/* Plots */}
       <div className="liquid-glass rounded-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="text-xs text-white/40 font-body">Your plots ({plotCount})</div>
           <div className="flex gap-2">
-            {readyPlotIds.length > 1 && (
+            {readyPlotIds.length > 0 && (
               <button
                 disabled={busy}
                 onClick={() => send("batchHarvest", [readyPlotIds])}
                 aria-label={`Harvest all ${readyPlotIds.length} ready plots`}
-                className="liquid-glass-strong rounded-full px-3 py-1.5 text-xs font-semibold text-white border-none cursor-pointer hover:scale-105 transition-transform disabled:opacity-40"
+                title="Shortcut: press H"
+                className="liquid-glass-strong rounded-full px-3 py-1.5 text-xs font-semibold text-white border-none cursor-pointer hover:scale-105 transition-transform disabled:opacity-40 flex items-center gap-1"
               >
-                Harvest All ({readyPlotIds.length})
+                <span>✓</span>
+                <span>Harvest All ({readyPlotIds.length})</span>
               </button>
             )}
             <button
@@ -489,7 +553,9 @@ function PlotCard({
   return (
     <div
       title={empty ? "Empty plot" : crop?.name}
-      className={`bg-white/5 border rounded-2xl p-3 text-center flex flex-col justify-between min-h-[130px] ${ready ? "border-green-500/60" : "border-white/5"}`}
+      className={`bg-white/5 border rounded-2xl p-3 text-center flex flex-col justify-between min-h-[130px] transition-colors ${
+        ready ? "border-green-500/60 bg-green-500/5" : soon ? "border-yellow-500/30" : "border-white/5"
+      }`}
     >
       <div className="text-3xl leading-none mb-1">{empty ? "🟫" : crop?.emoji}</div>
 
@@ -527,7 +593,7 @@ function PlotCard({
             <div className="text-[9px] text-white/30 font-body mb-1">ready at {formatHarvestTime(plantedAt, crop?.growMins ?? 0)}</div>
           )}
           <div className="mb-2">
-            <GrowthBar progress={ready ? 1 : growProgress} />
+            <GrowthBar progress={ready ? 1 : growProgress} showPct={!ready} />
           </div>
           <button
             disabled={busy || !ready}
@@ -543,4 +609,4 @@ function PlotCard({
 }
 
 
-// [farm-page-v] 10
+// [farm-page-v] 11
