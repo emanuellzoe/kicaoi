@@ -665,7 +665,11 @@ export function IsometricFarm({
   }, [busy, onPlant, onHarvest, screenToGrid]);
 
   return (
-    <div className="relative rounded-2xl overflow-hidden border border-white/10">
+    <div
+      className="relative rounded-2xl overflow-hidden border border-white/10"
+      style={{ animation: "farmFadeIn 0.6s ease-out" }}
+    >
+      <style>{`@keyframes farmFadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }`}</style>
       <canvas
         ref={canvasRef}
         role="img"
