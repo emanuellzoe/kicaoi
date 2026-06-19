@@ -589,7 +589,7 @@ function PlotCard({
             <div className="text-[9px] text-white/30 font-body mb-1">ready at {formatHarvestTime(plantedAt, crop?.growMins ?? 0)}</div>
           )}
           <div className="mb-2">
-            <GrowthBar progress={ready ? 1 : growProgress} />
+            <GrowthBar progress={ready ? 1 : growProgress} showPct={!ready} />
           </div>
           <button
             disabled={busy || !ready}
