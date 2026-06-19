@@ -612,6 +612,8 @@ export function IsometricFarm({
     <div className="relative rounded-2xl overflow-hidden border border-white/10">
       <canvas
         ref={canvasRef}
+        role="img"
+        aria-label={`Isometric farm view with ${plotCount} plot${plotCount !== 1 ? "s" : ""}. Click a plot to plant or harvest.`}
         className="w-full block"
         style={{ height: CANVAS_H, cursor: busy ? "wait" : "pointer", touchAction: "none" }}
         onMouseMove={handleMove}
