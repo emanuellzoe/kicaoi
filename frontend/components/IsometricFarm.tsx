@@ -21,6 +21,7 @@ interface Sparkle { x: number; y: number; vx: number; vy: number; life: number; 
 export interface IsometricFarmProps {
   plots: PlotState[];
   plotCount: number;
+  loading?: boolean;
   busy: boolean;
   selectedCropId: number;
   unlockCost?: bigint;
@@ -362,7 +363,7 @@ function countReadyPlots(plots: PlotState[], nowSec: number): number {
 }
 
 export function IsometricFarm({
-  plots, plotCount, busy, selectedCropId, unlockCost,
+  plots, plotCount, loading = false, busy, selectedCropId, unlockCost,
   onSelectCrop, onPlant, onHarvest,
 }: IsometricFarmProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -704,8 +705,9 @@ export function IsometricFarm({
           </button>
         ))}
       </div>
-      {/* Plot count */}
-      <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/50 border border-white/10 font-body">
+      {/* Plot count / loading indicator */}
+      <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/50 border border-white/10 font-body flex items-center gap-1.5">
+        {loading && <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />}
         {plotCount} plot{plotCount !== 1 ? "s" : ""}
       </div>
       {/* Harvest-ready badge */}
