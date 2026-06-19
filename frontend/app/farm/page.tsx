@@ -28,6 +28,7 @@ import { ZERO_ADDRESS, SEED_PER_CELO, PLOTS_POLL_INTERVAL_MS } from "@/lib/const
 import { IsometricFarm } from "@/components/IsometricFarm";
 import { FarmStats } from "@/components/FarmStats";
 import { CropInfoPanel } from "@/components/CropInfoPanel";
+import { GrowthTimeline } from "@/components/GrowthTimeline";
 
 const ZERO = ZERO_ADDRESS;
 const SEED_RATE = SEED_PER_CELO;
@@ -391,6 +392,17 @@ function Farm({
         onPlant={(plotId) => send("plant", [BigInt(plotId), selectedCropId])}
         onHarvest={(plotId) => send("harvest", [BigInt(plotId)])}
       />
+
+      {/* Growth Timeline */}
+      {plots.data && plotCount > 0 && (
+        <GrowthTimeline
+          plots={Array.from({ length: plotCount }, (_, i) => ({
+            cropId: plots.data?.[i] ? Number(plots.data[i].cropId) : 0,
+            plantedAt: plots.data?.[i] ? Number(plots.data[i].plantedAt) : 0,
+          }))}
+          now={now}
+        />
+      )}
 
       {/* Plots */}
       <div className="liquid-glass rounded-2xl p-4">
