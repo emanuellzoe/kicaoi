@@ -280,6 +280,18 @@ function Farm({
     return ids;
   }, [plots.data, plotCount, now]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "h" || e.key === "H") {
+        if (!busy && readyPlotIds.length > 0) send("batchHarvest", [readyPlotIds]);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [busy, readyPlotIds]);
+
   return (
     <div className="flex flex-col gap-3">
       {/* Balances */}
