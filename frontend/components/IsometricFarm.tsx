@@ -5,11 +5,12 @@ import { cropById, CROPS } from "@/lib/contract";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const TW = 96;
-const TH = 48;
-const TD = 18;
+const TW = 96;   // tile width (iso diamond)
+const TH = 48;   // tile height (iso diamond)
+const TD = 18;   // tile depth (3D extrusion)
 const CANVAS_H = 420;
 const TOOLTIP_FADE_FRAMES = 8;
+const DAY_CYCLE_HZ = 0.000052;  // full day/night cycle ~120 seconds
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -455,7 +456,7 @@ export function IsometricFarm({
       ctx.clearRect(0, 0, w, h);
 
       // Background — slow day/night cycle (full cycle ~120 seconds)
-      const dayPhase = (Math.sin(t * 0.000052) + 1) / 2; // 0=night, 1=day
+      const dayPhase = (Math.sin(t * DAY_CYCLE_HZ) + 1) / 2; // 0=night, 1=day
       const skyTop = `rgb(${Math.floor(4 + dayPhase * 8)},${Math.floor(8 + dayPhase * 22)},${Math.floor(4 + dayPhase * 14)})`;
       const skyMid = `rgb(${Math.floor(13 + dayPhase * 12)},${Math.floor(32 + dayPhase * 28)},${Math.floor(13 + dayPhase * 14)})`;
       const bg = ctx.createRadialGradient(w * 0.5, h * 0.4, 0, w * 0.5, h * 0.4, Math.max(w, h) * 0.9);
