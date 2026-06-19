@@ -282,6 +282,16 @@ function Farm({
     return ids;
   }, [plots.data, plotCount, now]);
 
+  const emptyPlotIds = useMemo(() => {
+    if (!plots.data) return [] as number[];
+    const ids: number[] = [];
+    for (let i = 0; i < plotCount; i++) {
+      const p = plots.data[i];
+      if (!p || p.cropId === 0) ids.push(i);
+    }
+    return ids;
+  }, [plots.data, plotCount]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
