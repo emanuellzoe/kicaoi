@@ -551,7 +551,9 @@ function PlotCard({
   return (
     <div
       title={empty ? "Empty plot" : crop?.name}
-      className={`bg-white/5 border rounded-2xl p-3 text-center flex flex-col justify-between min-h-[130px] ${ready ? "border-green-500/60" : "border-white/5"}`}
+      className={`bg-white/5 border rounded-2xl p-3 text-center flex flex-col justify-between min-h-[130px] transition-colors ${
+        ready ? "border-green-500/60 bg-green-500/5" : soon ? "border-yellow-500/30" : "border-white/5"
+      }`}
     >
       <div className="text-3xl leading-none mb-1">{empty ? "🟫" : crop?.emoji}</div>
 
