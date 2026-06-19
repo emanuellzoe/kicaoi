@@ -341,6 +341,14 @@ function drawTooltip(ctx: CanvasRenderingContext2D, text: string, x: number, y: 
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+function countReadyPlots(plots: PlotState[], nowSec: number): number {
+  return plots.filter((p) => {
+    if (!p || p.cropId === 0 || p.plantedAt === 0) return false;
+    const crop = cropById(p.cropId);
+    return crop ? nowSec >= p.plantedAt + crop.growMins * 60 : false;
+  }).length;
+}
+
 export function IsometricFarm({
   plots, plotCount, busy, selectedCropId, onSelectCrop, onPlant, onHarvest,
 }: IsometricFarmProps) {
@@ -608,6 +616,16 @@ export function IsometricFarm({
       <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1 text-xs text-white/50 border border-white/10 font-body">
         {plotCount} plot{plotCount !== 1 ? "s" : ""}
       </div>
+      {/* Harvest-ready badge */}
+      {(() => {
+        const ready = countReadyPlots(plots, Date.now() / 1000);
+        return ready > 0 ? (
+          <div className="absolute top-3 right-3 bg-green-500 text-black rounded-full px-2.5 py-1 text-xs font-bold flex items-center gap-1 shadow-lg shadow-green-500/30 animate-pulse">
+            <span>✓</span>
+            <span>{ready} ready</span>
+          </div>
+        ) : null;
+      })()}
     </div>
   );
 }
