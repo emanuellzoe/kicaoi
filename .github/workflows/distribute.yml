@@ -1,0 +1,43 @@
+name: KICAOI Distribute
+
+on:
+  workflow_dispatch:
+    inputs:
+      num_wallets:
+        description: 'Number of wallets to fund'
+        required: false
+        default: '252'
+      fund_per_wallet:
+        description: 'CELO per wallet (e.g. 0.065)'
+        required: false
+        default: '0.065'
+
+jobs:
+  distribute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: bot/package-lock.json
+
+      - name: Install dependencies
+        run: cd bot && npm ci --prefer-offline 2>/dev/null || npm install
+
+      - name: Distribute CELO
+        env:
+          CHAIN: celo
+          RPC_URL: ${{ secrets.RPC_URL }}
+          KICAOI_WALLETS: ${{ secrets.KICAOI_WALLETS }}
+          FUNDER_PRIVATE_KEY: ${{ secrets.FUNDER_PRIVATE_KEY }}
+          NUM_WALLETS: ${{ github.event.inputs.num_wallets }}
+          FUND_PER_WALLET: ${{ github.event.inputs.fund_per_wallet }}
+          MIN_GAS_RESERVE: "0.005"
+        run: cd bot && npx tsx src/distribute.ts
