@@ -26,6 +26,7 @@ import { GrowthBar } from "@/components/GrowthBar";
 import { formatCountdown, formatHarvestTime } from "@/lib/time";
 import { ZERO_ADDRESS, SEED_PER_CELO, PLOTS_POLL_INTERVAL_MS } from "@/lib/constants";
 import { IsometricFarm } from "@/components/IsometricFarm";
+import { FarmStats } from "@/components/FarmStats";
 
 const ZERO = ZERO_ADDRESS;
 const SEED_RATE = SEED_PER_CELO;
@@ -348,6 +349,17 @@ function Farm({
           </div>
         )}
       </div>
+
+      {/* Farm Stats */}
+      {stats.data && (
+        <FarmStats
+          plotCount={plotCount}
+          totalPlanted={Number(stats.data.totalPlanted)}
+          totalHarvested={Number(stats.data.totalHarvested)}
+          totalSeedHarvested={Number(stats.data.totalSeedHarvested)}
+          seedBalance={seedBal}
+        />
+      )}
 
       {/* Isometric Farm View */}
       <IsometricFarm
