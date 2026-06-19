@@ -69,9 +69,11 @@ export default function FarmPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/leaderboard"
-              className="liquid-glass rounded-full px-3 py-1.5 text-xs font-medium text-white/80 hover:text-white transition-colors no-underline"
+              className="liquid-glass rounded-full px-3 py-1.5 text-xs font-medium text-white/80 hover:text-white transition-colors no-underline flex items-center gap-1"
+              title="View leaderboard"
             >
-              🏆 Board
+              <span>🏆</span>
+              <span className="hidden sm:inline">Board</span>
             </Link>
             {isConnected && !isMiniPay && (
               <button
