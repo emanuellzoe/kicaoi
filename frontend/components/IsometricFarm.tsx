@@ -441,7 +441,15 @@ export function IsometricFarm({
             drawCrop(ctx, x, y, plot.cropId, prog, t);
 
             if (isHov && crop) {
-              const label = isReady ? `✓ Harvest ${crop.name}` : `${crop.name} ${Math.round(prog * 100)}%`;
+              let label: string;
+              if (isReady) {
+                label = `✓ Harvest ${crop.name} (+${crop.yield} SEED)`;
+              } else {
+                const secsLeft = Math.max(0, (plot.plantedAt + crop.growMins * 60) - nowSec);
+                const mLeft = Math.ceil(secsLeft / 60);
+                const timeStr = mLeft >= 60 ? `${Math.floor(mLeft / 60)}h ${mLeft % 60}m` : `${mLeft}m`;
+                label = `${crop.name} ${Math.round(prog * 100)}% · ${timeStr} left`;
+              }
               drawTooltip(ctx, label, x, y - TH / 2);
             }
           } else if (isHov && active) {
