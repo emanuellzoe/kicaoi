@@ -1,6 +1,6 @@
 "use client";
 
-import { cropById, CROPS } from "@/lib/contract";
+import { cropById } from "@/lib/contract";
 
 interface CropInfoPanelProps {
   selectedCropId: number;
@@ -12,7 +12,8 @@ export function CropInfoPanel({ selectedCropId, seedBalance }: CropInfoPanelProp
   if (!crop) return null;
 
   const canAfford = seedBalance >= crop.cost;
-  const profitPerHour = ((crop.yield - crop.cost) / crop.growMins) * 60;
+  const profitPerCycle = crop.yield - crop.cost;
+  const profitPerHour = (profitPerCycle / crop.growMins) * 60;
 
   return (
     <div className="liquid-glass rounded-2xl p-4 flex items-center gap-4">
@@ -33,10 +34,11 @@ export function CropInfoPanel({ selectedCropId, seedBalance }: CropInfoPanelProp
         </div>
       </div>
       <div className="text-right flex-shrink-0">
-        <div className="text-[10px] text-white/30 font-body">Profit/hr</div>
-        <div className={`text-sm font-bold ${profitPerHour > 0 ? "text-green-400" : "text-red-400"}`}>
-          {profitPerHour > 0 ? "+" : ""}{profitPerHour.toFixed(1)}
+        <div className="text-[10px] text-white/30 font-body">+/cycle</div>
+        <div className={`text-sm font-bold ${profitPerCycle > 0 ? "text-green-400" : "text-red-400"}`}>
+          {profitPerCycle > 0 ? "+" : ""}{profitPerCycle} SEED
         </div>
+        <div className="text-[10px] text-white/30 font-body">{profitPerHour.toFixed(1)}/hr</div>
       </div>
     </div>
   );
