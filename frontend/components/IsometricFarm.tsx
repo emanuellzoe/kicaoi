@@ -517,11 +517,14 @@ export function IsometricFarm({
           f.x = Math.random() * w; f.y = Math.random() * h * 0.7 + h * 0.1;
           f.vx = (Math.random() - 0.5) * 0.5; f.vy = (Math.random() - 0.5) * 0.3;
           f.life = 0; f.maxLife = 160 + Math.random() * 140;
+          f.size = 1.2 + Math.random() * 1.8;
         }
         const phase = f.life / f.maxLife;
         const alpha = Math.sin(phase * Math.PI) * (0.5 + Math.sin(t * 0.006 + f.x * 0.1) * 0.3);
+        const warm = (f.x + f.y) % 60 < 30;
+        const ffColor = warm ? `rgba(190,240,100,${alpha})` : `rgba(160,220,255,${alpha * 0.7})`;
         ctx.beginPath(); ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(190,240,100,${alpha})`; ctx.fill();
+        ctx.fillStyle = ffColor; ctx.fill();
       }
 
       animRef.current = requestAnimationFrame(frame);
