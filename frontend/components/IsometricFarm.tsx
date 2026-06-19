@@ -414,9 +414,12 @@ export function IsometricFarm({
 
       ctx.clearRect(0, 0, w, h);
 
-      // Background
+      // Background — slow day/night cycle (full cycle ~120 seconds)
+      const dayPhase = (Math.sin(t * 0.000052) + 1) / 2; // 0=night, 1=day
+      const skyTop = `rgb(${Math.floor(4 + dayPhase * 8)},${Math.floor(8 + dayPhase * 22)},${Math.floor(4 + dayPhase * 14)})`;
+      const skyMid = `rgb(${Math.floor(13 + dayPhase * 12)},${Math.floor(32 + dayPhase * 28)},${Math.floor(13 + dayPhase * 14)})`;
       const bg = ctx.createRadialGradient(w * 0.5, h * 0.4, 0, w * 0.5, h * 0.4, Math.max(w, h) * 0.9);
-      bg.addColorStop(0, "#0d200d"); bg.addColorStop(1, "#040804");
+      bg.addColorStop(0, skyMid); bg.addColorStop(1, skyTop);
       ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
 
       // Draw in painter's order (back to front)
