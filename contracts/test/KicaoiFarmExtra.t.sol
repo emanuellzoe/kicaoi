@@ -226,4 +226,28 @@ contract KicaoiFarmExtraTest is Test {
         vm.prank(alice);
         farm.buySeeds{value: 1 ether}();
     }
+
+    event Planted(address indexed user, uint256 indexed plotId, uint8 cropId, uint256 plantedAt);
+    event Harvested(
+        address indexed user, uint256 indexed plotId, uint8 cropId, uint256 yieldAmount
+    );
+
+    function test_Plant_EmitsPlanted() public {
+        _fund(alice, 1 ether);
+        vm.expectEmit(true, true, false, true, address(farm));
+        emit Planted(alice, 0, WHEAT, block.timestamp);
+        vm.prank(alice);
+        farm.plant(0, WHEAT);
+    }
+
+    function test_Harvest_EmitsHarvested() public {
+        _fund(alice, 1 ether);
+        vm.startPrank(alice);
+        farm.plant(0, WHEAT);
+        vm.warp(block.timestamp + 5 minutes);
+        vm.expectEmit(true, true, false, true, address(farm));
+        emit Harvested(alice, 0, WHEAT, 9);
+        farm.harvest(0);
+        vm.stopPrank();
+    }
 }
