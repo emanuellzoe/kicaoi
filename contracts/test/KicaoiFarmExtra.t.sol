@@ -110,4 +110,69 @@ contract KicaoiFarmExtraTest is Test {
         (, uint64 totalPlanted,,) = farm.stats(alice);
         assertEq(totalPlanted, 2);
     }
+
+    function test_BatchPlant_RevertsOnLengthMismatch() public {
+        _fund(alice, 1 ether);
+        uint256[] memory ids = new uint256[](2);
+        uint8[] memory cropIds = new uint8[](1);
+        vm.prank(alice);
+        vm.expectRevert(bytes("invalid args"));
+        farm.batchPlant(ids, cropIds);
+    }
+
+    function test_BatchPlant_RevertsOnEmptyArgs() public {
+        _fund(alice, 1 ether);
+        uint256[] memory ids = new uint256[](0);
+        uint8[] memory cropIds = new uint8[](0);
+        vm.prank(alice);
+        vm.expectRevert(bytes("invalid args"));
+        farm.batchPlant(ids, cropIds);
+    }
+
+    function test_BatchPlant_RevertsOnDisabledCrop() public {
+        _fund(alice, 1 ether);
+        uint256[] memory ids = new uint256[](1);
+        uint8[] memory cropIds = new uint8[](1);
+        cropIds[0] = 99; // unknown/disabled
+        vm.prank(alice);
+        vm.expectRevert(KicaoiFarm.CropDisabled.selector);
+        farm.batchPlant(ids, cropIds);
+    }
+
+    function test_BatchPlant_RevertsOnPlotOutOfRange() public {
+        _fund(alice, 1 ether);
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 5; // only 0..2 exist
+        uint8[] memory cropIds = new uint8[](1);
+        cropIds[0] = WHEAT;
+        vm.prank(alice);
+        vm.expectRevert(KicaoiFarm.PlotOutOfRange.selector);
+        farm.batchPlant(ids, cropIds);
+    }
+
+    function test_BatchPlant_RevertsOnNonEmptyPlot() public {
+        _fund(alice, 1 ether);
+        vm.startPrank(alice);
+        farm.plant(0, WHEAT);
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 0; // already planted
+        uint8[] memory cropIds = new uint8[](1);
+        cropIds[0] = WHEAT;
+        vm.expectRevert(KicaoiFarm.PlotNotEmpty.selector);
+        farm.batchPlant(ids, cropIds);
+        vm.stopPrank();
+    }
+
+    function test_BatchPlant_RevertsOnInsufficientSeed() public {
+        _fund(alice, 0.05 ether); // 5 SEED, two wheat costs 10
+        uint256[] memory ids = new uint256[](2);
+        ids[0] = 0;
+        ids[1] = 1;
+        uint8[] memory cropIds = new uint8[](2);
+        cropIds[0] = WHEAT;
+        cropIds[1] = WHEAT;
+        vm.prank(alice);
+        vm.expectRevert(KicaoiFarm.InsufficientSeed.selector);
+        farm.batchPlant(ids, cropIds);
+    }
 }
