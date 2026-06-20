@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatCountdown, growthPhase, formatDuration } from "@/lib/time";
+import { formatCountdown, growthPhase, formatDuration, formatHarvestTime } from "@/lib/time";
 
 describe("formatCountdown", () => {
   it("returns 'Ready' for zero or negative seconds", () => {
@@ -47,5 +47,23 @@ describe("formatDuration", () => {
 
   it("formats bare seconds", () => {
     expect(formatDuration(45)).toBe("45s");
+  });
+});
+
+describe("formatHarvestTime", () => {
+  // Output is locale/timezone dependent, so assert structure rather than a
+  // fixed clock value: it should be a non-empty short time string and should
+  // advance when the grow duration grows.
+  it("returns a non-empty time string", () => {
+    expect(formatHarvestTime(0, 60).length).toBeGreaterThan(0);
+  });
+
+  it("is stable for the same inputs", () => {
+    expect(formatHarvestTime(1000, 30)).toBe(formatHarvestTime(1000, 30));
+  });
+
+  it("differs when the ready time crosses into a new hour", () => {
+    const planted = 0;
+    expect(formatHarvestTime(planted, 0)).not.toBe(formatHarvestTime(planted, 120));
   });
 });
