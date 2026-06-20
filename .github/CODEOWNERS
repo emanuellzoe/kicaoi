@@ -1,0 +1,5 @@
+# Default owners for everything in the repo.
+* @emanuellzoe
+
+# Smart contracts require contract-owner review.
+/contracts/ @emanuellzoe
