@@ -26,18 +26,18 @@ describe("formatAddress", () => {
 });
 
 describe("formatSeed", () => {
-  // Thousands grouping is locale-dependent, so assert against the same
-  // toLocaleString() the implementation uses rather than a hardcoded comma.
-  it("groups the number and appends the SEED unit", () => {
-    expect(formatSeed(12345)).toBe(`${(12345).toLocaleString()} SEED`);
+  // Output is pinned to the en-US locale, so grouping is deterministic
+  // regardless of the host locale (guards against SSR hydration mismatch).
+  it("groups with commas and appends the SEED unit", () => {
+    expect(formatSeed(12345)).toBe("12,345 SEED");
   });
 
   it("omits the unit when showUnit is false", () => {
-    expect(formatSeed(12345, false)).toBe((12345).toLocaleString());
+    expect(formatSeed(12345, false)).toBe("12,345");
   });
 
   it("accepts bigint amounts", () => {
-    expect(formatSeed(1000n)).toBe(`${(1000).toLocaleString()} SEED`);
+    expect(formatSeed(1000n)).toBe("1,000 SEED");
   });
 });
 

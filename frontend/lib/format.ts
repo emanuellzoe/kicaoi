@@ -1,5 +1,11 @@
 /** Shared display-formatting utilities for addresses, numbers, and SEED amounts. */
 
+// Pin a fixed locale so server-rendered and client-rendered output are byte
+// identical — `toLocaleString()` with no locale uses the host's locale, which
+// differs between the SSR host and the user's browser and causes React
+// hydration mismatches (e.g. "12,345" vs "12.345").
+const NUMBER_LOCALE = "en-US";
+
 /**
  * Returns a short display form of an Ethereum address.
  * Example: "0xAbCd…1234"
@@ -16,7 +22,7 @@ export function formatAddress(address: string, prefixLen = 6, suffixLen = 4): st
  */
 export function formatSeed(amount: number | bigint, showUnit = true): string {
   const n = typeof amount === "bigint" ? Number(amount) : amount;
-  const formatted = n.toLocaleString();
+  const formatted = n.toLocaleString(NUMBER_LOCALE);
   return showUnit ? `${formatted} SEED` : formatted;
 }
 
