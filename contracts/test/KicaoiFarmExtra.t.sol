@@ -215,4 +215,15 @@ contract KicaoiFarmExtraTest is Test {
         vm.expectRevert(KicaoiFarm.TransferFailed.selector);
         farm.withdrawCelo(payable(address(0)), 1 ether);
     }
+
+    /* ----------------------------- events --------------------------- */
+
+    event SeedsBought(address indexed user, uint256 celoAmount, uint256 seedCredited);
+
+    function test_BuySeeds_EmitsSeedsBought() public {
+        vm.expectEmit(true, false, false, true, address(farm));
+        emit SeedsBought(alice, 1 ether, 100);
+        vm.prank(alice);
+        farm.buySeeds{value: 1 ether}();
+    }
 }
