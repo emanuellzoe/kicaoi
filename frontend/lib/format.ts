@@ -21,7 +21,8 @@ export function formatAddress(address: string, prefixLen = 6, suffixLen = 4): st
  * Example: 12345 → "12,345 SEED"
  */
 export function formatSeed(amount: number | bigint, showUnit = true): string {
-  const n = typeof amount === "bigint" ? Number(amount) : amount;
+  const raw = typeof amount === "bigint" ? Number(amount) : amount;
+  const n = Number.isFinite(raw) ? raw : 0;
   const formatted = n.toLocaleString(NUMBER_LOCALE);
   return showUnit ? `${formatted} SEED` : formatted;
 }
@@ -31,7 +32,8 @@ export function formatSeed(amount: number | bigint, showUnit = true): string {
  * Example: 1.234567 → "1.2346 CELO"
  */
 export function formatCelo(amount: number, decimals = 4, showUnit = true): string {
-  const formatted = amount.toFixed(decimals);
+  const n = Number.isFinite(amount) ? amount : 0;
+  const formatted = n.toFixed(decimals);
   return showUnit ? `${formatted} CELO` : formatted;
 }
 
@@ -40,6 +42,7 @@ export function formatCelo(amount: number, decimals = 4, showUnit = true): strin
  * Example: 12345 → "12.3K", 1234567 → "1.23M"
  */
 export function formatCompact(n: number): string {
+  if (!Number.isFinite(n)) return "0";
   const sign = n < 0 ? "-" : "";
   const abs = Math.abs(n);
   if (abs >= 1_000_000) return `${sign}${(abs / 1_000_000).toFixed(2)}M`;
@@ -52,5 +55,6 @@ export function formatCompact(n: number): string {
  * Example: 0.756 → "75.6%"
  */
 export function formatPercent(ratio: number, decimals = 1): string {
-  return `${(Math.min(1, Math.max(0, ratio)) * 100).toFixed(decimals)}%`;
+  const r = Number.isFinite(ratio) ? ratio : 0;
+  return `${(Math.min(1, Math.max(0, r)) * 100).toFixed(decimals)}%`;
 }

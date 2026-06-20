@@ -84,3 +84,12 @@ describe("formatPercent", () => {
     expect(formatPercent(-0.5)).toBe("0.0%");
   });
 });
+
+describe("non-finite guards", () => {
+  it("treats NaN/Infinity as zero", () => {
+    expect(formatSeed(NaN)).toBe("0 SEED");
+    expect(formatCelo(Infinity)).toBe("0.0000 CELO");
+    expect(formatCompact(NaN)).toBe("0");
+    expect(formatPercent(NaN)).toBe("0.0%");
+  });
+});
