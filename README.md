@@ -12,6 +12,9 @@
 ![Frontend](https://img.shields.io/badge/frontend-Next.js%20%2B%20React-black)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
+[![Frontend tests](https://github.com/emanuellzoe/kicaoi/actions/workflows/frontend-tests.yml/badge.svg)](https://github.com/emanuellzoe/kicaoi/actions/workflows/frontend-tests.yml)
+[![Contracts](https://github.com/emanuellzoe/kicaoi/actions/workflows/contracts.yml/badge.svg)](https://github.com/emanuellzoe/kicaoi/actions/workflows/contracts.yml)
+
 > **⚠️ Honest status:** Kicaoi is an **MVP in active development** for the **Celo Proof of Ship** builder program. This README documents the target architecture; sections use a status legend so nothing is overclaimed.
 >
 > **Legend:** ✅ implemented &nbsp;·&nbsp; 🚧 in progress &nbsp;·&nbsp; 🗺️ planned
