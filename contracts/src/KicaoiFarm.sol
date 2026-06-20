@@ -244,13 +244,18 @@ contract KicaoiFarm is Ownable, ReentrancyGuard {
             p.cropId = 0;
             p.plantedAt = 0;
             totalYield += c.yieldAmount;
-            unchecked { harvestCount += 1; s.totalSeedHarvested += c.yieldAmount; }
+            unchecked {
+                harvestCount += 1;
+                s.totalSeedHarvested += c.yieldAmount;
+            }
             emit Harvested(msg.sender, plotId, cropId, c.yieldAmount);
         }
 
         require(harvestCount > 0, "nothing ready");
         seedBalance[msg.sender] += totalYield;
-        unchecked { s.totalHarvested += harvestCount; }
+        unchecked {
+            s.totalHarvested += harvestCount;
+        }
     }
 
     /**
@@ -286,7 +291,9 @@ contract KicaoiFarm is Ownable, ReentrancyGuard {
             p.plantedAt = ts;
             emit Planted(msg.sender, plotIds[i], cropIds[i], ts);
         }
-        unchecked { s.totalPlanted += uint64(len); }
+        unchecked {
+            s.totalPlanted += uint64(len);
+        }
     }
 
     /* ------------------------------------------------------------------ */
@@ -384,8 +391,9 @@ contract KicaoiFarm is Ownable, ReentrancyGuard {
         bool enabled
     ) internal {
         require(cropId != 0, "cropId 0 reserved");
-        crops[cropId] =
-            CropConfig({plantCost: plantCost, yieldAmount: yieldAmount, growTime: growTime, enabled: enabled});
+        crops[cropId] = CropConfig({
+            plantCost: plantCost, yieldAmount: yieldAmount, growTime: growTime, enabled: enabled
+        });
         emit CropUpdated(cropId, plantCost, growTime, yieldAmount, enabled);
     }
 }
