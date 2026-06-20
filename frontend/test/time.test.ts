@@ -7,6 +7,11 @@ describe("formatCountdown", () => {
     expect(formatCountdown(-10)).toBe("Ready");
   });
 
+  it("returns 'Ready' for non-finite input", () => {
+    expect(formatCountdown(NaN)).toBe("Ready");
+    expect(formatCountdown(Infinity)).toBe("Ready");
+  });
+
   it("formats durations over an hour as 'Hh MMm'", () => {
     expect(formatCountdown(3661)).toBe("1h 01m");
   });

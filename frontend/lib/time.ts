@@ -3,7 +3,7 @@
  * Returns `"Ready"` for non-positive values.
  */
 export function formatCountdown(secs: number): string {
-  if (secs <= 0) return "Ready";
+  if (!Number.isFinite(secs) || secs <= 0) return "Ready";
   const h = Math.floor(secs / 3600);
   const m = Math.floor((secs % 3600) / 60);
   const s = secs % 60;
