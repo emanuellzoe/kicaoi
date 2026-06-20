@@ -48,4 +48,45 @@ contract KicaoiFarmExtraTest is Test {
         assertEq(totalHarvested, 2);
         assertEq(totalSeedHarvested, 18);
     }
+
+    function test_BatchHarvest_SkipsEmptyAndUnripe() public {
+        _fund(alice, 1 ether);
+        vm.startPrank(alice);
+        farm.plant(0, WHEAT); // ready after warp
+        farm.plant(1, PUMPKIN); // 30 min grow, stays unripe
+        vm.warp(block.timestamp + 5 minutes);
+
+        uint256[] memory ids = new uint256[](3);
+        ids[0] = 0; // ready
+        ids[1] = 1; // unripe -> skipped
+        ids[2] = 2; // empty -> skipped
+        farm.batchHarvest(ids);
+        vm.stopPrank();
+
+        assertEq(farm.getPlot(alice, 0).cropId, 0, "ready plot harvested");
+        assertEq(farm.getPlot(alice, 1).cropId, PUMPKIN, "unripe plot untouched");
+        (,, uint64 totalHarvested,) = farm.stats(alice);
+        assertEq(totalHarvested, 1, "only the ready plot counts");
+    }
+
+    function test_BatchHarvest_RevertsWhenNothingReady() public {
+        _fund(alice, 1 ether);
+        vm.startPrank(alice);
+        farm.plant(0, PUMPKIN); // 30 min, not ready
+
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 0;
+        vm.expectRevert(bytes("nothing ready"));
+        farm.batchHarvest(ids);
+        vm.stopPrank();
+    }
+
+    function test_BatchHarvest_RevertsOnPlotOutOfRange() public {
+        _fund(alice, 1 ether);
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 3; // only 0..2 exist
+        vm.prank(alice);
+        vm.expectRevert(KicaoiFarm.PlotOutOfRange.selector);
+        farm.batchHarvest(ids);
+    }
 }
