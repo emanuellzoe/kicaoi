@@ -21,6 +21,7 @@ import { CROPS, cropById, CUSD_ADDRESS, KICAOI_ABI, KICAOI_ADDRESS } from "@/lib
 import { evaluateAchievements, type AchievementState } from "@/lib/achievements";
 import { getStreak, recordHarvest } from "@/lib/streak";
 import { getPrestige, type PrestigeLevel } from "@/lib/prestige";
+import { usePlotMemory } from "@/hooks/usePlotMemory";
 import { SeedCalculator } from "@/components/SeedCalculator";
 import { GrowthBar } from "@/components/GrowthBar";
 import { formatCountdown, formatHarvestTime } from "@/lib/time";
@@ -528,7 +529,8 @@ function PlotCard({
     return () => clearInterval(t);
   }, []);
 
-  const [pick, setPick] = useState(1);
+  const { remember, recall } = usePlotMemory(plotId);
+  const [pick, setPick] = useState(() => recall());
   const crop = cropById(cropId);
   const empty = cropId === 0;
 
@@ -575,7 +577,7 @@ function PlotCard({
           </div>
           <button
             disabled={busy || seedBal < (cropById(pick)?.cost ?? 0)}
-            onClick={() => onPlant(pick)}
+            onClick={() => { remember(pick); onPlant(pick); }}
             className="w-full liquid-glass-strong rounded-full py-2 text-xs font-semibold text-white border-none cursor-pointer disabled:opacity-40 hover:scale-105 transition-transform"
           >
             Plant ({cropById(pick)?.cost} SEED)
