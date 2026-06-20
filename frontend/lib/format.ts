@@ -40,8 +40,10 @@ export function formatCelo(amount: number, decimals = 4, showUnit = true): strin
  * Example: 12345 → "12.3K", 1234567 → "1.23M"
  */
 export function formatCompact(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  const sign = n < 0 ? "-" : "";
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000) return `${sign}${(abs / 1_000_000).toFixed(2)}M`;
+  if (abs >= 1_000) return `${sign}${(abs / 1_000).toFixed(1)}K`;
   return n.toString();
 }
 

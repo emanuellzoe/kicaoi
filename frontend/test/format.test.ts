@@ -63,6 +63,15 @@ describe("formatCompact", () => {
   it("leaves small numbers untouched", () => {
     expect(formatCompact(999)).toBe("999");
   });
+
+  it("compacts large negative magnitudes with a sign", () => {
+    expect(formatCompact(-1_500_000)).toBe("-1.50M");
+    expect(formatCompact(-12_345)).toBe("-12.3K");
+  });
+
+  it("leaves small negative numbers untouched", () => {
+    expect(formatCompact(-999)).toBe("-999");
+  });
 });
 
 describe("formatPercent", () => {
