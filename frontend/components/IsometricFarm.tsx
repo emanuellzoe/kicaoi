@@ -253,6 +253,7 @@ function drawPumpkin(ctx: CanvasRenderingContext2D, cx: number, cy: number, p: n
   const size = 7 + p * 28;
   const bodyY = cy - size * 0.65;
   const sw = sway * 0.4;
+  const orange = Math.max(0, (p - 0.5) / 0.5);
   for (let l = 0; l < 3; l++) {
     const lx = cx + (l - 1) * size * 0.55 + sw;
     const leafAlpha = p < 0.85 ? 1 : 1 - (p - 0.85) / 0.15;
@@ -260,7 +261,6 @@ function drawPumpkin(ctx: CanvasRenderingContext2D, cx: number, cy: number, p: n
     const leafR = Math.floor(20 + orange * 10), leafG = Math.floor(110 - orange * 30);
     ctx.fillStyle = `rgba(${leafR},${leafG},15,${leafAlpha})`; ctx.fill();
   }
-  const orange = Math.max(0, (p - 0.5) / 0.5);
   const rr = Math.floor(30 + orange * 225), gg = Math.floor(120 - orange * 80);
   for (let seg = -1; seg <= 1; seg++) {
     const segX = cx + seg * size * 0.38 + sw;
