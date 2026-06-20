@@ -208,4 +208,11 @@ contract KicaoiFarmExtraTest is Test {
         vm.expectRevert();
         farm.setStartingPlots(5);
     }
+
+    function test_WithdrawCelo_RevertsToZeroAddress() public {
+        _fund(alice, 1 ether);
+        vm.prank(owner);
+        vm.expectRevert(KicaoiFarm.TransferFailed.selector);
+        farm.withdrawCelo(payable(address(0)), 1 ether);
+    }
 }
