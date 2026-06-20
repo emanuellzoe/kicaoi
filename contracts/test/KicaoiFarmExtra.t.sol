@@ -175,4 +175,21 @@ contract KicaoiFarmExtraTest is Test {
         vm.expectRevert(KicaoiFarm.InsufficientSeed.selector);
         farm.batchPlant(ids, cropIds);
     }
+
+    /* ----------------------- admin: setters ------------------------- */
+
+    function test_SetUnlockBaseCost_OnlyOwner_AndApplies() public {
+        vm.prank(owner);
+        farm.setUnlockBaseCost(100);
+        assertEq(farm.unlockBaseCost(), 100);
+
+        _fund(alice, 5 ether); // 500 SEED, 3 plots
+        assertEq(farm.nextUnlockCost(alice), 300, "100 * 3 plots");
+    }
+
+    function test_SetUnlockBaseCost_RevertsForNonOwner() public {
+        vm.prank(alice);
+        vm.expectRevert();
+        farm.setUnlockBaseCost(100);
+    }
 }
