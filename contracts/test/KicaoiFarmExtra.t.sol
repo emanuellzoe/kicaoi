@@ -89,4 +89,25 @@ contract KicaoiFarmExtraTest is Test {
         vm.expectRevert(KicaoiFarm.PlotOutOfRange.selector);
         farm.batchHarvest(ids);
     }
+
+    /* --------------------------- batchPlant -------------------------- */
+
+    function test_BatchPlant_PlantsAll_DeductsTotalCost() public {
+        _fund(alice, 1 ether); // 100 SEED
+        uint256[] memory ids = new uint256[](2);
+        ids[0] = 0;
+        ids[1] = 1;
+        uint8[] memory cropIds = new uint8[](2);
+        cropIds[0] = WHEAT; // 5
+        cropIds[1] = PUMPKIN; // 20
+
+        vm.prank(alice);
+        farm.batchPlant(ids, cropIds);
+
+        assertEq(farm.seedBalance(alice), 75, "100 - 5 - 20");
+        assertEq(farm.getPlot(alice, 0).cropId, WHEAT);
+        assertEq(farm.getPlot(alice, 1).cropId, PUMPKIN);
+        (, uint64 totalPlanted,,) = farm.stats(alice);
+        assertEq(totalPlanted, 2);
+    }
 }
