@@ -15,13 +15,26 @@ function yesterday(): string {
   return new Date(Date.now() - MS_PER_DAY).toISOString().slice(0, 10);
 }
 
+/** Parses stored streak data, returning null if the shape is missing or corrupt. */
+function parseStreak(raw: string | null): StreakData | null {
+  if (!raw) return null;
+  try {
+    const d = JSON.parse(raw);
+    if (d && typeof d.lastDate === "string" && Number.isFinite(d.count)) {
+      return { lastDate: d.lastDate, count: d.count };
+    }
+  } catch {
+    /* fall through */
+  }
+  return null;
+}
+
 /** Returns the current streak count for `address`, or 0 if expired or not started. */
 export function getStreak(address: string): number {
   if (typeof window === "undefined") return 0;
   try {
-    const raw = localStorage.getItem(streakKey(address));
-    if (!raw) return 0;
-    const d: StreakData = JSON.parse(raw);
+    const d = parseStreak(localStorage.getItem(streakKey(address)));
+    if (!d) return 0;
     const t = today();
     const y = yesterday();
     if (d.lastDate === t || d.lastDate === y) return d.count;
@@ -36,12 +49,11 @@ export function recordHarvest(address: string): number {
   if (typeof window === "undefined") return 0;
   try {
     const key = streakKey(address);
-    const raw = localStorage.getItem(key);
+    const d = parseStreak(localStorage.getItem(key));
     const t = today();
     const y = yesterday();
     let count = 1;
-    if (raw) {
-      const d: StreakData = JSON.parse(raw);
+    if (d) {
       if (d.lastDate === t) return d.count;
       if (d.lastDate === y) count = d.count + 1;
     }

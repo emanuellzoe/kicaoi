@@ -47,6 +47,23 @@ describe("getStreak", () => {
     expect(getStreak(ADDR)).toBe(0);
   });
 
+  it("returns 0 for corrupt or wrong-shaped stored data", () => {
+    localStorage.setItem("kicaoi_streak_" + ADDR.toLowerCase(), "not json");
+    expect(getStreak(ADDR)).toBe(0);
+    localStorage.setItem("kicaoi_streak_" + ADDR.toLowerCase(), "5");
+    expect(getStreak(ADDR)).toBe(0);
+    localStorage.setItem(
+      "kicaoi_streak_" + ADDR.toLowerCase(),
+      JSON.stringify({ lastDate: 123, count: "x" })
+    );
+    expect(getStreak(ADDR)).toBe(0);
+  });
+
+  it("recovers cleanly from corrupt data on the next harvest", () => {
+    localStorage.setItem("kicaoi_streak_" + ADDR.toLowerCase(), "garbage");
+    expect(recordHarvest(ADDR)).toBe(1);
+  });
+
   it("returns 0 once the streak has expired", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T12:00:00Z"));
