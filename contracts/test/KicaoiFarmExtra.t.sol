@@ -192,4 +192,20 @@ contract KicaoiFarmExtraTest is Test {
         vm.expectRevert();
         farm.setUnlockBaseCost(100);
     }
+
+    function test_SetStartingPlots_AppliesToFirstBuy() public {
+        vm.prank(owner);
+        farm.setStartingPlots(5);
+        assertEq(farm.startingPlots(), 5);
+
+        _fund(alice, 1 ether);
+        (uint64 plotCount,,,) = farm.stats(alice);
+        assertEq(plotCount, 5, "first buy grants the new starting plot count");
+    }
+
+    function test_SetStartingPlots_RevertsForNonOwner() public {
+        vm.prank(alice);
+        vm.expectRevert();
+        farm.setStartingPlots(5);
+    }
 }
