@@ -6,7 +6,13 @@ type PlotMemory = Record<number, number>; // plotId -> cropId
 function load(): PlotMemory {
   if (typeof window === "undefined") return {};
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "{}");
+    const parsed = JSON.parse(localStorage.getItem(KEY) ?? "{}");
+    // Guard against corrupt values (e.g. "5" or an array) so callers can
+    // always safely assign properties on the result.
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as PlotMemory;
+    }
+    return {};
   } catch {
     return {};
   }

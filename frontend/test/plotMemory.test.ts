@@ -30,6 +30,19 @@ describe("recallCrop", () => {
   });
 });
 
+describe("corrupt storage", () => {
+  it("falls back to defaults when the stored value is not an object", () => {
+    localStorage.setItem("kicaoi:lastCrop", "5");
+    expect(recallCrop(1)).toBe(1);
+  });
+
+  it("still allows remembering a crop after corrupt data", () => {
+    localStorage.setItem("kicaoi:lastCrop", "[1,2,3]");
+    expect(() => rememberCrop(1, 4)).not.toThrow();
+    expect(recallCrop(1)).toBe(4);
+  });
+});
+
 describe("clearPlotMemory", () => {
   it("resets all plots back to the default", () => {
     rememberCrop(1, 5);
