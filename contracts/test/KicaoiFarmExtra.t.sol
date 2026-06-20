@@ -260,4 +260,29 @@ contract KicaoiFarmExtraTest is Test {
         vm.prank(alice);
         farm.unlockPlot();
     }
+
+    /* --------------------------- setCrop ---------------------------- */
+
+    function test_SetCrop_DisablePreventsPlanting() public {
+        _fund(alice, 1 ether);
+
+        // Owner disables Wheat (keep other params unchanged).
+        vm.prank(owner);
+        farm.setCrop(WHEAT, 5, 5 minutes, 9, false);
+
+        vm.prank(alice);
+        vm.expectRevert(KicaoiFarm.CropDisabled.selector);
+        farm.plant(0, WHEAT);
+    }
+
+    function test_SetCrop_RetuneAppliesToNewPlant() public {
+        // Owner retunes Wheat to a cheaper cost; new plant uses it.
+        vm.prank(owner);
+        farm.setCrop(WHEAT, 1, 1 minutes, 3, true);
+
+        _fund(alice, 1 ether); // 100 SEED
+        vm.prank(alice);
+        farm.plant(0, WHEAT);
+        assertEq(farm.seedBalance(alice), 99, "new plant cost is 1");
+    }
 }
