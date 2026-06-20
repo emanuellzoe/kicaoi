@@ -250,4 +250,14 @@ contract KicaoiFarmExtraTest is Test {
         farm.harvest(0);
         vm.stopPrank();
     }
+
+    event PlotUnlocked(address indexed user, uint256 newPlotCount, uint256 cost);
+
+    function test_UnlockPlot_EmitsPlotUnlocked() public {
+        _fund(alice, 5 ether); // 500 SEED, 3 plots
+        vm.expectEmit(true, false, false, true, address(farm));
+        emit PlotUnlocked(alice, 4, 150); // 50 * 3
+        vm.prank(alice);
+        farm.unlockPlot();
+    }
 }
