@@ -26,3 +26,4 @@ bot/auto-consolidate-err.log
 bot/node_modules/
 scripts/
 .vercel
+bot/wallets-secret.json
