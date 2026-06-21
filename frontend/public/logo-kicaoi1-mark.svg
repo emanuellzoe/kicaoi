@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1190 1488" fill="none">
+  <!-- Organic asterisk / splat mark — white on transparent background -->
+  <g fill="#ffffff" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round">
+    <!-- radiating spokes (rounded fingers) -->
+    <line x1="620" y1="750" x2="650"  y2="412"  stroke-width="80"/>  <!-- top -->
+    <line x1="620" y1="750" x2="802"  y2="430"  stroke-width="72"/>  <!-- upper-right -->
+    <line x1="620" y1="750" x2="250"  y2="466"  stroke-width="60"/>  <!-- upper-left (long) -->
+    <line x1="620" y1="750" x2="350"  y2="700"  stroke-width="60"/>  <!-- left -->
+    <line x1="620" y1="750" x2="960"  y2="700"  stroke-width="62"/>  <!-- right -->
+    <line x1="620" y1="750" x2="906"  y2="854"  stroke-width="60"/>  <!-- lower-right -->
+    <line x1="620" y1="750" x2="616"  y2="1014" stroke-width="64"/>  <!-- bottom -->
+    <line x1="620" y1="750" x2="392"  y2="1084" stroke-width="62"/>  <!-- lower-left (long) -->
+    <!-- fat irregular centre blob -->
+    <path d="M790 740
+             C 800 800 780 850 730 880
+             C 690 910 640 920 610 910
+             C 560 900 510 900 500 870
+             C 460 840 450 780 470 740
+             C 460 680 490 640 520 620
+             C 560 590 620 580 640 590
+             C 700 600 760 610 760 640
+             C 800 680 790 700 790 740 Z"/>
+  </g>
+</svg>
