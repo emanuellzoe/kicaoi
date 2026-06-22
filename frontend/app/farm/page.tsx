@@ -30,6 +30,7 @@ import { IsometricFarm } from "@/components/IsometricFarm";
 import { FarmStats } from "@/components/FarmStats";
 import { CropInfoPanel } from "@/components/CropInfoPanel";
 import { GrowthTimeline } from "@/components/GrowthTimeline";
+import { WelcomeBackPanel } from "@/components/WelcomeBackPanel";
 
 const ZERO = ZERO_ADDRESS;
 const SEED_RATE = SEED_PER_CELO;
@@ -348,6 +349,23 @@ function Farm({
           </div>
         )}
       </div>
+
+      {/* Welcome-back summary: what ripened while away */}
+      {plots.data && plotCount > 0 && (
+        <WelcomeBackPanel
+          plots={Array.from({ length: plotCount }, (_, i) => ({
+            cropId: plots.data?.[i] ? Number(plots.data[i].cropId) : 0,
+            plantedAt: plots.data?.[i] ? Number(plots.data[i].plantedAt) : 0,
+          }))}
+          getCrop={(id) => cropById(id)}
+          nowSec={now}
+          onHarvestAll={
+            readyPlotIds.length > 0 && !busy
+              ? () => send("batchHarvest", [readyPlotIds])
+              : undefined
+          }
+        />
+      )}
 
       {/* Buy Seeds */}
       <div className="liquid-glass rounded-2xl p-4">
