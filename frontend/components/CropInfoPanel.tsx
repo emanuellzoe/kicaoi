@@ -1,6 +1,7 @@
 "use client";
 
 import { cropById } from "@/lib/contract";
+import { CropRarityBadge } from "@/components/CropRarityBadge";
 
 interface CropInfoPanelProps {
   selectedCropId: number;
@@ -21,6 +22,7 @@ export function CropInfoPanel({ selectedCropId, seedBalance }: CropInfoPanelProp
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span className="font-bold text-white text-sm">{crop.name}</span>
+          <CropRarityBadge cost={crop.cost} yieldAmt={crop.yield} />
           {canAfford ? (
             <span className="text-[10px] bg-green-500/20 text-green-400 rounded-full px-2 py-0.5 font-body">Can plant</span>
           ) : (
