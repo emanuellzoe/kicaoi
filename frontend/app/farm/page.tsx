@@ -31,6 +31,7 @@ import { FarmStats } from "@/components/FarmStats";
 import { CropInfoPanel } from "@/components/CropInfoPanel";
 import { GrowthTimeline } from "@/components/GrowthTimeline";
 import { WelcomeBackPanel } from "@/components/WelcomeBackPanel";
+import { RankBadge } from "@/components/RankBadge";
 
 const ZERO = ZERO_ADDRESS;
 const SEED_RATE = SEED_PER_CELO;
@@ -394,6 +395,19 @@ function Farm({
           </div>
         )}
       </div>
+
+      {/* Composite Farm Score rank */}
+      {stats.data && (
+        <RankBadge
+          variant="card"
+          stats={{
+            plotCount,
+            totalPlanted: Number(stats.data.totalPlanted),
+            totalHarvested: Number(stats.data.totalHarvested),
+            totalSeedHarvested: Number(stats.data.totalSeedHarvested),
+          }}
+        />
+      )}
 
       {/* Farm Stats */}
       {stats.data && (
