@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import BlurText from "@/components/ui/BlurText";
+import PixelPlant from "@/components/PixelPlant";
 
 const CROPS = [
   { emoji: "🌾", name: "Wheat", time: "5 min", yield: "+9 SEED", cost: "5 SEED", roi: "180%" },
@@ -70,12 +71,21 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="liquid-glass rounded-full px-1 py-1 pr-4 flex items-center gap-3 mb-8"
+            className="liquid-glass rounded-full px-1 py-1 pr-4 flex items-center gap-3 mb-6"
           >
             <span className="bg-green-500 text-black rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider font-body">
               🌱 LIVE
             </span>
             <span className="text-white/70 font-body text-sm font-medium">On-chain farming on Celo.</span>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.35, duration: 0.6 }}
+            className="mb-4"
+          >
+            <PixelPlant className="w-24 h-32 md:w-28 md:h-36 drop-shadow-[0_0_28px_rgba(63,174,79,0.3)]" />
           </motion.div>
 
           <BlurText
