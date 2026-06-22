@@ -5,13 +5,13 @@ import Link from "next/link";
 import { useAccount } from "wagmi";
 import { formatAddress } from "@/lib/format";
 import { LEADERBOARD_MAX_ENTRIES, LEADERBOARD_REFRESH_SECS } from "@/lib/constants";
-
-const MEDAL = ["🥇", "🥈", "🥉"];
+import { rankEntries, findRank, percentile, medalFor } from "@/lib/leaderboard";
 
 type Entry = {
   rank: number;
   address: `0x${string}`;
   totalSeedHarvested: string;
+  totalPlanted: number;
   totalHarvested: number;
   plotCount: number;
 };
@@ -26,6 +26,23 @@ export default function LeaderboardPage() {
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const meNormalised = useMemo(() => me?.toLowerCase(), [me]);
+
+  // Re-rank client-side by composite Farm Score (lib/leaderboard) rather than
+  // the raw-SEED order the API returns, and reuse its medal/percentile helpers.
+  const lbEntries = useMemo(
+    () =>
+      entries.map((e) => ({
+        address: e.address,
+        plotCount: e.plotCount,
+        totalPlanted: e.totalPlanted,
+        totalHarvested: e.totalHarvested,
+        totalSeedHarvested: Number(e.totalSeedHarvested),
+      })),
+    [entries]
+  );
+  const ranked = useMemo(() => rankEntries(lbEntries), [lbEntries]);
+  const myRank = useMemo(() => (me ? findRank(lbEntries, me) : null), [lbEntries, me]);
+  const myPct = useMemo(() => (me ? percentile(lbEntries, me) : null), [lbEntries, me]);
 
   const load = async () => {
     setLoading(true);
@@ -97,7 +114,7 @@ export default function LeaderboardPage() {
         <div className="liquid-glass rounded-2xl p-4 mb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-white/40 font-body">Ranked by lifetime SEED harvested</span>
+              <span className="text-xs text-white/40 font-body">Ranked by Farm Score</span>
               {entries.length > 0 && (
                 <span className="text-xs text-white/30 font-body">({entries.length} farmers)</span>
               )}
@@ -118,12 +135,14 @@ export default function LeaderboardPage() {
         {me &&
           entries.length > 0 &&
           (() => {
-            const rank = entries.findIndex((e) => e.address.toLowerCase() === meNormalised);
-            return rank >= 0 ? (
+            return myRank !== null ? (
               <div className="liquid-glass rounded-2xl p-3 mb-3 flex items-center justify-between">
                 <span className="text-xs text-white/50 font-body">Your rank</span>
                 <span className="text-sm font-bold text-green-400">
-                  #{rank + 1} of {entries.length}
+                  #{myRank} of {entries.length}
+                  {myPct !== null && (
+                    <span className="text-xs text-white/40 font-body ml-2">{myPct}th percentile</span>
+                  )}
                 </span>
               </div>
             ) : (
@@ -162,15 +181,16 @@ export default function LeaderboardPage() {
           </div>
         ) : (
           <div className="liquid-glass rounded-2xl overflow-hidden">
-            {entries.slice(0, LEADERBOARD_MAX_ENTRIES).map((e, i) => {
+            {ranked.slice(0, LEADERBOARD_MAX_ENTRIES).map((e) => {
               const isMe = me && e.address.toLowerCase() === meNormalised;
+              const medal = medalFor(e.rank);
               return (
                 <div
                   key={e.address}
-                  className={`flex items-center gap-3 px-4 py-3.5 border-b border-white/5 last:border-b-0 ${isMe ? "bg-green-900/20" : ""} ${i < 3 ? "bg-gradient-to-r from-white/5 to-transparent" : ""}`}
+                  className={`flex items-center gap-3 px-4 py-3.5 border-b border-white/5 last:border-b-0 ${isMe ? "bg-green-900/20" : ""} ${e.rank <= 3 ? "bg-gradient-to-r from-white/5 to-transparent" : ""}`}
                 >
                   <span className="text-base font-bold min-w-[32px] text-center text-white/60">
-                    {i < 3 ? MEDAL[i] : `#${i + 1}`}
+                    {medal || `#${e.rank}`}
                   </span>
                   <span className="flex-1 font-mono text-sm text-white/80 flex items-center gap-1">
                     {formatAddress(e.address)}
@@ -188,9 +208,9 @@ export default function LeaderboardPage() {
                     </button>
                   </span>
                   <div className="text-right">
-                    <div className="text-sm font-bold text-green-400">{e.totalSeedHarvested.toString()} SEED</div>
+                    <div className="text-sm font-bold text-green-400">{e.score.toLocaleString()} pts</div>
                     <div className="text-[11px] text-white/40 font-body">
-                      {e.totalHarvested} harvests · {e.plotCount} plot{e.plotCount !== 1 ? "s" : ""}
+                      {e.totalSeedHarvested.toLocaleString()} SEED · {e.totalHarvested} harvests
                     </div>
                   </div>
                 </div>
