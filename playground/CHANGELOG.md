@@ -400,3 +400,8 @@
 - u-398: add utility (bg #65a30d, pad 398px)
 - u-399: add utility (bg #ea580c, pad 399px)
 - u-400: add utility (bg #0d9488, pad 400px)
+- u-401: add utility (bg #2563eb, pad 401px)
+- u-402: add utility (bg #16a34a, pad 402px)
+- u-403: add utility (bg #dc2626, pad 403px)
+- u-404: add utility (bg #d97706, pad 404px)
+- u-405: add utility (bg #7c3aed, pad 405px)
