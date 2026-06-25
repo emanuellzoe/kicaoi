@@ -435,3 +435,8 @@
 - u-433: add utility (bg #dc2626, pad 433px)
 - u-434: add utility (bg #d97706, pad 434px)
 - u-435: add utility (bg #7c3aed, pad 435px)
+- u-436: add utility (bg #0891b2, pad 436px)
+- u-437: add utility (bg #db2777, pad 437px)
+- u-438: add utility (bg #65a30d, pad 438px)
+- u-439: add utility (bg #ea580c, pad 439px)
+- u-440: add utility (bg #0d9488, pad 440px)
