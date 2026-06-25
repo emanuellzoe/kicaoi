@@ -470,3 +470,4 @@
 - u-468: add utility (bg #65a30d, pad 468px)
 - u-469: add utility (bg #ea580c, pad 469px)
 - u-470: add utility (bg #0d9488, pad 470px)
+- u-471: add utility (bg #2563eb, pad 471px)
