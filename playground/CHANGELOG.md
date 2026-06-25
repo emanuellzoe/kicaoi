@@ -415,3 +415,8 @@
 - u-413: add utility (bg #dc2626, pad 413px)
 - u-414: add utility (bg #d97706, pad 414px)
 - u-415: add utility (bg #7c3aed, pad 415px)
+- u-416: add utility (bg #0891b2, pad 416px)
+- u-417: add utility (bg #db2777, pad 417px)
+- u-418: add utility (bg #65a30d, pad 418px)
+- u-419: add utility (bg #ea580c, pad 419px)
+- u-420: add utility (bg #0d9488, pad 420px)
