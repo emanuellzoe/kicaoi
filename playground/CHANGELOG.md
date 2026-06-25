@@ -495,3 +495,8 @@
 - u-493: add utility (bg #dc2626, pad 493px)
 - u-494: add utility (bg #d97706, pad 494px)
 - u-495: add utility (bg #7c3aed, pad 495px)
+- u-496: add utility (bg #0891b2, pad 496px)
+- u-497: add utility (bg #db2777, pad 497px)
+- u-498: add utility (bg #65a30d, pad 498px)
+- u-499: add utility (bg #ea580c, pad 499px)
+- u-500: add utility (bg #0d9488, pad 500px)
