@@ -404,3 +404,4 @@
 - u-402: add utility (bg #16a34a, pad 402px)
 - u-403: add utility (bg #dc2626, pad 403px)
 - u-404: add utility (bg #d97706, pad 404px)
+- u-405: add utility (bg #7c3aed, pad 405px)
