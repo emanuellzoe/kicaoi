@@ -420,3 +420,8 @@
 - u-418: add utility (bg #65a30d, pad 418px)
 - u-419: add utility (bg #ea580c, pad 419px)
 - u-420: add utility (bg #0d9488, pad 420px)
+- u-421: add utility (bg #2563eb, pad 421px)
+- u-422: add utility (bg #16a34a, pad 422px)
+- u-423: add utility (bg #dc2626, pad 423px)
+- u-424: add utility (bg #d97706, pad 424px)
+- u-425: add utility (bg #7c3aed, pad 425px)
