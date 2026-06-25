@@ -485,3 +485,8 @@
 - u-483: add utility (bg #dc2626, pad 483px)
 - u-484: add utility (bg #d97706, pad 484px)
 - u-485: add utility (bg #7c3aed, pad 485px)
+- u-486: add utility (bg #0891b2, pad 486px)
+- u-487: add utility (bg #db2777, pad 487px)
+- u-488: add utility (bg #65a30d, pad 488px)
+- u-489: add utility (bg #ea580c, pad 489px)
+- u-490: add utility (bg #0d9488, pad 490px)
