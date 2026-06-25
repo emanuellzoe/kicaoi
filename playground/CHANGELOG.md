@@ -479,3 +479,4 @@
 - u-477: add utility (bg #db2777, pad 477px)
 - u-478: add utility (bg #65a30d, pad 478px)
 - u-479: add utility (bg #ea580c, pad 479px)
+- u-480: add utility (bg #0d9488, pad 480px)
