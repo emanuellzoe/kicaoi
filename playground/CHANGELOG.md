@@ -440,3 +440,4 @@
 - u-438: add utility (bg #65a30d, pad 438px)
 - u-439: add utility (bg #ea580c, pad 439px)
 - u-440: add utility (bg #0d9488, pad 440px)
+- u-441: add utility (bg #2563eb, pad 441px)
